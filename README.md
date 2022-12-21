@@ -7,6 +7,11 @@
 -   get alerts about any anomalies, broken or depricated cryptographic functions
 -   100% pure go, minimal(internal-only) imports, use as app or api (see api.go), compatible with certinfo, dnsinfo, ...
 
+## Install 
+```
+go install paepcke.de/tlsinfo/cmd/tlsinfo@latest
+```
+
 # Showtime
 
 ## Get a summary of a single host TLS [connection|handshake].
