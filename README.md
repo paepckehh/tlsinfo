@@ -1,4 +1,4 @@
-# Overview
+# OVERVIEW
 
 [paepcke.de/tlsinfo](https://paepcke.de/tlsinfo)
 
@@ -7,12 +7,13 @@
 -   get alerts about any anomalies, broken or depricated cryptographic functions
 -   100% pure go, minimal(internal-only) imports, use as app or api (see api.go), compatible with certinfo, dnsinfo, ...
 
-## Install 
+# INSTALL
+
 ```
 go install paepcke.de/tlsinfo/cmd/tlsinfo@latest
 ```
 
-# Showtime
+# SHOWTIME 
 
 ## Get a summary of a single host TLS [connection|handshake].
 
@@ -133,3 +134,7 @@ func main() {
 reportPage := HttpRequestReportHTML(q) // q is normally the server http.Request object within http handler
 [...]
 ```
+
+# CONTRIBUTION
+
+Yes, Please! PRs Welcome! 
