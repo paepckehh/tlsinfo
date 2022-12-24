@@ -1,10 +1,10 @@
 module paepcke.de/tlsinfo
 
-go 1.18
+go 1.20
 
 require (
 	golang.org/x/crypto v0.4.0
-	paepcke.de/certinfo v0.0.0-20221220090536-376afa1c6d44
+	paepcke.de/certinfo v0.0.0-20221224074141-f819d0d07921
 	paepcke.de/reportstyle v0.0.0-20221220090731-aea5a6894279
 )
 
