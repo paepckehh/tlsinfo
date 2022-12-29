@@ -1,7 +1,6 @@
-// package tlsinfo ...
+// package tlsinfo reports tls connection parameter
 package tlsinfo
 
-// import
 import (
 	"bytes"
 	"crypto/tls"

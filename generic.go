@@ -1,7 +1,5 @@
-// package tlsinfo
 package tlsinfo
 
-// import
 import (
 	"strings"
 
