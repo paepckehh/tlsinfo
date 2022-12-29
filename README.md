@@ -13,6 +13,10 @@
 go install paepcke.de/tlsinfo/cmd/tlsinfo@latest
 ```
 
+# DOWNLOAD (prebuild)
+
+[github.com/paepckehh/tlsinfo/releases](https://github.com/paepckehh/tlsinfo/releases)
+
 # SHOWTIME 
 
 ## Get a summary of a single host TLS [connection|handshake].
