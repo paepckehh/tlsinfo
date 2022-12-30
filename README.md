@@ -13,7 +13,7 @@
 go install paepcke.de/tlsinfo/cmd/tlsinfo@latest
 ```
 
-# DOWNLOAD (prebuild)
+### DOWNLOAD (prebuild)
 
 [github.com/paepckehh/tlsinfo/releases](https://github.com/paepckehh/tlsinfo/releases)
 
