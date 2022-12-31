@@ -51,7 +51,7 @@ func main() {
 			out(tlsinfo.ReportHost(os.Args[i], &tls.Config{}, style))
 		}
 	default:
-		errExit("no pipe or input parameter found, example: certinfo file.txt")
+		errExit("no pipe or input parameter found, example: tlsinfo github.com\n")
 	}
 }
 
