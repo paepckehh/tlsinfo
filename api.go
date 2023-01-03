@@ -160,9 +160,9 @@ func ReportTlsState(state *tls.ConnectionState, e *reportstyle.Style) string {
 	s.WriteString(e.L1 + "TLS Version               " + e.L2 + version(state.Version, true) + e.LE)
 	s.WriteString(e.L1 + "TLS ALPN                  " + e.L2 + state.NegotiatedProtocol + e.LE)
 	s.WriteString(e.L1 + "TLS Resumed               " + e.L2 + valid(state.DidResume) + e.LE)
-	s.WriteString(e.L1 + "TLS Protocol Mutual       " + e.L2 + valid(state.NegotiatedProtocolIsMutual) + e.LE)
 	s.WriteString(e.L1 + "TLS Server Name           " + e.L2 + state.ServerName + e.LE)
 	s.WriteString(e.L1 + "TLS Cipher Suite          " + e.L2 + tls.CipherSuiteName(state.CipherSuite) + e.LE)
+	//nolint:all - keep as informative point, besides linter correct security concerns
 	s.WriteString(e.L1 + "TLS Uniq ID               " + build(hex.EncodeToString(state.TLSUnique), e))
 	s.WriteString(e.L1 + "TLS Signed Timestamps     " + build(ts, e))
 	s.WriteString(e.L1 + "TLS Verified Cert Chains\n" + build(certinfo.CertStores(state.VerifiedChains, certReport), e))
@@ -189,10 +189,7 @@ func ReportOcsp(conn *tls.Conn, issuerCert *x509.Certificate) string {
 
 // PinVerifyHostWithTLS ...
 func PinVerifyHostWithTLS(keyPin, host string, tlsconfig *tls.Config) bool {
-	if keyPin == PinHostWithTLS(host, tlsconfig) {
-		return true
-	}
-	return false
+	return keyPin == PinHostWithTLS(host, tlsconfig)
 }
 
 // PinHostWithTLS ...
