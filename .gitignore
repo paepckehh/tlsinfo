@@ -21,5 +21,4 @@
 Makefile
 doc
 vendor
-tlsinfo
 cmd/tlsinfo/tlsinfo
