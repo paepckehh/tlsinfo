@@ -139,6 +139,10 @@ reportPage := HttpRequestReportHTML(q) // q is normally the server http.Request 
 [...]
 ```
 
+# DOCS
+
+[pkg.go.dev/paepcke.de/tlsinfo](https://pkg.go.dev/paepcke.de/tlsinfo)
+
 # CONTRIBUTION
 
 Yes, Please! PRs Welcome! 
