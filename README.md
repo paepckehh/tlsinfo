@@ -105,7 +105,7 @@ PEMONLY=true tlsinfo github.com > truststore.pem
 -   hostname 
 -   net/http/Request
 -   crypto/tls/Connection
--   rypto/tls/ConnectionState
+-   crypto/tls/ConnectionState
 -   crypto/ocsp
 
 ## Output Format Styles via paepcke.de/reportstyle
