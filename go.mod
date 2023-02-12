@@ -4,8 +4,8 @@ go 1.20
 
 require (
 	golang.org/x/crypto v0.6.0
-	paepcke.de/certinfo v0.1.20
-	paepcke.de/reportstyle v0.1.9
+	paepcke.de/certinfo v0.1.21
+	paepcke.de/reportstyle v0.1.10
 )
 
 require (
