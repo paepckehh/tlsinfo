@@ -4,7 +4,7 @@
 [paepcke.de/tlsinfo](https://paepcke.de/tlsinfo/)
 
 -   tired of remembering all the commandline switches of [openssl|certutil] to analyze an tls session, trust cert chains, ...
--   validated and (clean) export certificate chains, keys, pins, cryptographic states by just entering the hostname
+-   validate, parse and clean export certificate chains, keys, pins, cryptographic states by just entering the hostname
 -   get alerts about any anomalies, broken or depricated cryptographic functions
 -   100% pure go, minimal(internal-only) imports, use as app or api (see api.go), compatible with certinfo, dnsinfo, ...
 
