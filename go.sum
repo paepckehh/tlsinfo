@@ -15,5 +15,5 @@ k8s.io/klog/v2 v2.80.1 h1:atnLQ121W371wYYFawwYx1aEY2eUfs4l3J72wtgAwV4=
 k8s.io/klog/v2 v2.80.1/go.mod h1:y1WjHnz7Dj687irZUWR/WLkLc5N1YHtjLdmgWjndZn0=
 paepcke.de/certinfo v0.1.24 h1:9fKKEOfyvsSdT7ktQ04K4uJghs6NFXNPrElRFitJifU=
 paepcke.de/certinfo v0.1.24/go.mod h1:R5ymi26jkIL7VsbV1Djrbw4qLTPiS9b30gvLyUM5AXE=
-paepcke.de/reportstyle v0.1.12 h1:LsFbrW7+pBIcAUwNrHrkxGdvNnsQ6GSXKMS/tdMJc6I=
-paepcke.de/reportstyle v0.1.12/go.mod h1:n8RawMbFocJ+xICuqY6RAsGgEvOrgAeSXA/Myu5ecPE=
+paepcke.de/reportstyle v0.1.13 h1:Jatg8wR+jqK5+snihnbaECAu2Fvn+JT8LKfdLuHVe34=
+paepcke.de/reportstyle v0.1.13/go.mod h1:n8RawMbFocJ+xICuqY6RAsGgEvOrgAeSXA/Myu5ecPE=
