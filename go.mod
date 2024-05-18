@@ -5,7 +5,7 @@ go 1.21
 require (
 	golang.org/x/crypto v0.23.0
 	paepcke.de/certinfo v0.1.35
-	paepcke.de/reportstyle v0.1.22
+	paepcke.de/reportstyle v0.1.24
 )
 
 require (
