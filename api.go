@@ -129,7 +129,7 @@ func ReportConn(conn *tls.Conn, e *reportstyle.Style) string {
 		s.WriteString(e.L1 + "NET Remote Port           " + e.L2 + remoteIP[1] + e.LE)
 	}
 	if len(state.PeerCertificates) > 0 {
-		if msg := ReportOcsp(conn, state.PeerCertificates[1]); len(msg) > 0 {
+		if msg := ReportOcsp(conn, state.PeerCertificates[0]); len(msg) > 0 {
 			s.WriteString(e.L1 + "TLS OCSP Status           " + build(msg, e))
 		}
 	}
