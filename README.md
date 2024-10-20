@@ -165,7 +165,7 @@ This project is licensed under the terms of the `BSD 3-Clause License` license. 
 ```bibtex
 @misc{tlsinfo,
   author = {Michael Paepcke},
-  title = {analyze and troubleshoot tls connections},
+  title = {Tool to analyze and troubleshoot TLS connections (app/lib/api)},
   year = {2022},
   publisher = {GitHub},
   journal = {GitHub repository},
