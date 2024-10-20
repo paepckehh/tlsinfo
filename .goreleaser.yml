@@ -8,6 +8,8 @@ builds:
     goos:
       - linux
       - freebsd
+      - netbsd
+      - openbsd
       - darwin
       - windows
     goarch:
@@ -21,7 +23,7 @@ archives:
     id: tlsinfo-binaries
     name_template: "tlsinfo-{{ .Os }}_{{ .Arch }}_{{ .Version }}"
     files:
-      - LICENSE.md
+      - LICENSE
       - README.md
 checksum:
   name_template: 'checksums.txt'
