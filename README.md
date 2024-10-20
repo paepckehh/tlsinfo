@@ -12,6 +12,13 @@
 -   get alerts about any anomalies, broken or depricated cryptographic functions
 -   100% pure go, minimal(internal-only) imports, use as app or api (see api.go), compatible with certinfo, dnsinfo, ...
 
+# RUN
+
+```
+go run paepcke.de/tlsinfo/cmd/tlsinfo@latest
+
+```
+
 # INSTALL
 
 ```
