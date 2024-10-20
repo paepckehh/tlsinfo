@@ -147,6 +147,25 @@ reportPage := HttpRequestReportHTML(q) // q is normally the server http.Request 
 
 [pkg.go.dev/paepcke.de/tlsinfo](https://pkg.go.dev/paepcke.de/tlsinfo)
 
+# 🛡 License
+
+[![License](https://img.shields.io/github/license/paepckehh/tlsinfo)](https://github.com/paepckehh/tlsinfo/blob/master/LICENSE)
+
+This project is licensed under the terms of the `BSD 3-Clause License` license. See [LICENSE](https://github.com/paepckehh/tlsinfo/blob/master/LICENSE) for more details.
+
+# 📃 Citation
+
+```bibtex
+@misc{tlsinfo,
+  author = {Michael Paepcke},
+  title = {analyze and troubleshoot tls connections},
+  year = {2022},
+  publisher = {GitHub},
+  journal = {GitHub repository},
+  howpublished = {\url{https://paepcke.de/tlsinfo}}
+}
+```
+
 # CONTRIBUTION
 
 Yes, Please! PRs Welcome! 
