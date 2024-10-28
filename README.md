@@ -4,6 +4,7 @@
 [![Go Build](https://github.com/paepckehh/tlsinfo/actions/workflows/golang.yml/badge.svg)](https://github.com/paepckehh/tlsinfo/actions/workflows/golang.yml)
 [![License](https://img.shields.io/github/license/paepckehh/tlsinfo)](https://github.com/paepckehh/tlsinfo/blob/master/LICENSE)
 [![SemVer](https://img.shields.io/github/v/release/paepckehh/tlsinfo)](https://github.com/paepckehh/tlsinfo/releases/latest)
+<br>[![built with nix](https://builtwithnix.org/badge.svg)](https://builtwithnix.org)
 
 [paepcke.de/tlsinfo](https://paepcke.de/tlsinfo/)
 
