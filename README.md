@@ -13,21 +13,31 @@
 -   get alerts about any anomalies, broken or depricated cryptographic functions
 -   100% pure go, minimal(internal-only) imports, use as app or api (see api.go), compatible with certinfo, dnsinfo, ...
 
-# RUN
-
+# ⚡️HOW TO RUN VIA GO
 ```
 go run paepcke.de/tlsinfo/cmd/tlsinfo@latest
 
 ```
 
-# INSTALL
-
+# ⚡️HOW TO INSTALL VIA GO
 ```
 go install paepcke.de/tlsinfo/cmd/tlsinfo@latest
 ```
 
-# PRE-BUILD BINARIES (DOWNLOAD)
+# ⚡️PRE-BUILD BINARIES (DOWNLOAD)
 [https://github.com/paepckehh/tlsinfo/releases](https://github.com/paepckehh/tlsinfo/releases)
+
+# ⚡️HOW TO RUN ON NIXOS
+```
+nix-shell -p tlsinfo
+```
+
+# ⚡️HOW TO INSTALL ON NIXOS
+```
+environment.systemPackages = [
+  pkgs.tlsinfo
+];
+```
 
 # SHOWTIME 
 
