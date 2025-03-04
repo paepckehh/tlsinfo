@@ -4,6 +4,7 @@ all:
 check: 
 	gofmt -w -s .
 	go vet .
+	golangci-lint run
 	staticcheck
 
 examples:

@@ -15,4 +15,5 @@ check:
 	gofmt -w -s .
 	go vet .
 	staticcheck
+	golangci-lint run
 	make -C cmd/$(PROJECT) check

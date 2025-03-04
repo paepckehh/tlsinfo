@@ -4,7 +4,7 @@ go 1.23.5
 
 require (
 	golang.org/x/crypto v0.35.0
-	paepcke.de/certinfo v0.1.41
+	paepcke.de/certinfo v0.1.42
 	paepcke.de/reportstyle v0.1.25
 )
 
