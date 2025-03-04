@@ -3,9 +3,6 @@ PROJECT=$(shell basename $(CURDIR))
 all:
 	make -C cmd/$(PROJECT) all
 
-clean:
-	make -C cmd/$(PROJECT) clean
-
 examples:
 	make -C cmd/$(PROJECT) examples
 
@@ -16,5 +13,6 @@ deps:
 
 check: 
 	gofmt -w -s .
+	go vet .
 	staticcheck
 	make -C cmd/$(PROJECT) check

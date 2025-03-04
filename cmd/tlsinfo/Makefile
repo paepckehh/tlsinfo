@@ -3,11 +3,9 @@ all:
 
 check: 
 	gofmt -w -s .
+	go vet .
 	staticcheck
 
-clean:
-
 examples:
-	
 	go run main.go github.com
 	go run main.go paepcke.de

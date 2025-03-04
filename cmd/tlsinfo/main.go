@@ -5,6 +5,7 @@ package main
 import (
 	"crypto/tls"
 	"io"
+	"log"
 	"os"
 	"syscall"
 
@@ -52,7 +53,7 @@ func main() {
 			out(tlsinfo.ReportHost(os.Args[i], &tls.Config{}, style))
 		}
 	default:
-		errExit("no pipe or input parameter found, example: tlsinfo github.com")
+		log.Fatal(_app + _err + "no pipe or input parameter found, example: tlsinfo github.com")
 	}
 }
 
@@ -65,12 +66,6 @@ func out(msg string) {
 	os.Stdout.Write([]byte(msg))
 }
 
-// errExit
-func errExit(msg string) {
-	out(_app + _err + msg + _linefeed)
-	os.Exit(1)
-}
-
 // isPipe ...
 func isPipe() bool {
 	out, _ := os.Stdin.Stat()
@@ -81,7 +76,7 @@ func isPipe() bool {
 func getPipe() string {
 	pipe, err := io.ReadAll(os.Stdin)
 	if err != nil {
-		errExit("reading data from pipe")
+		log.Fatal(_app + _err + "reading data from pipe")
 	}
 	return string(pipe)
 }
