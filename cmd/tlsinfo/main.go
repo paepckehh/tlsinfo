@@ -63,7 +63,9 @@ func main() {
 
 // out ...
 func out(msg string) {
-	os.Stdout.Write([]byte(msg))
+	if _, err := os.Stdout.Write([]byte(msg)); err != nil {
+		panic("unrecoverable error, unable to write stdout")
+	}
 }
 
 // isPipe ...

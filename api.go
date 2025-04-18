@@ -6,6 +6,7 @@ import (
 	"crypto/tls"
 	"crypto/x509"
 	"encoding/hex"
+	"fmt"
 	"net/http"
 	"strings"
 
@@ -110,7 +111,11 @@ func ReportHost(host string, t *tls.Config, e *reportstyle.Style) string {
 	if err != nil {
 		return "DEBUG:" + err.Error()
 	}
-	defer conn.Close()
+	defer func() {
+		if err := conn.Close(); err != nil {
+			fmt.Printf("[certinfo] [error] during connection close: %s", err.Error())
+		}
+	}()
 	return ReportConn(conn, e)
 }
 
@@ -201,7 +206,11 @@ func PinHostWithTLS(host string, tlsconfig *tls.Config) string {
 	if err != nil {
 		return "[certinfo] [error] [connect] " + target + " -> " + err.Error()
 	}
-	defer conn.Close()
+	defer func() {
+		if err := conn.Close(); err != nil {
+			fmt.Printf("[certinfo] [error] during connection close: %s: %s", target, err.Error())
+		}
+	}()
 	certs := conn.ConnectionState().PeerCertificates
 	if len(certs) > 0 {
 		return certinfo.KeyPinBase64(certs[0])
