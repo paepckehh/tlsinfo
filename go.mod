@@ -1,6 +1,6 @@
 module paepcke.de/tlsinfo
 
-go 1.24.4
+go 1.24.5
 
 require (
 	golang.org/x/crypto v0.41.0

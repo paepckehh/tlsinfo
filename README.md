@@ -27,6 +27,7 @@ go install paepcke.de/tlsinfo/cmd/tlsinfo@latest
 # ⚡️PRE-BUILD BINARIES (DOWNLOAD)
 [https://github.com/paepckehh/tlsinfo/releases](https://github.com/paepckehh/tlsinfo/releases)
 
+
 # ⚡️HOW TO RUN ON NIXOS
 ```
 nix-shell -p tlsinfo
