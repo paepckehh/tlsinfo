@@ -8,5 +8,5 @@ golang.org/x/term v0.36.0 h1:zMPR+aF8gfksFprF/Nc/rd1wRS1EI6nDBGyWAvDzx2Q=
 golang.org/x/term v0.36.0/go.mod h1:Qu394IJq6V6dCBRgwqshf3mPF85AqzYEzofzRdZkWss=
 paepcke.de/certinfo v0.1.47 h1:eBSXFKIV8fxKNkQH77mSZIQhiEPm5g7BvolGlzDpsik=
 paepcke.de/certinfo v0.1.47/go.mod h1:aaMoXttCsbOlc+Y9BeFq1G7awPt76rYKf5/g2xZU4MU=
-paepcke.de/reportstyle v0.1.25 h1:PXBSlXSa5wxQ3ZlpFvQV7mxbVKZaabyE/D5iKg0BPwA=
-paepcke.de/reportstyle v0.1.25/go.mod h1:STzBTevP9KMX99UGrItEFgVK+JIGk4JaQkdPLbuv3A4=
+paepcke.de/reportstyle v0.1.26 h1:W3kuOJupRMg9piOJiR/bStbawPRXbUnPHJ0iZa0fsN0=
+paepcke.de/reportstyle v0.1.26/go.mod h1:9AB84kh2nSVrnIBSweF717ZObqMu71nyjNSDdPM+ZqA=
