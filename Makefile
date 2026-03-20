@@ -14,6 +14,8 @@ deps:
 check: 
 	gofmt -w -s .
 	CGO_ENABLED=0 go vet .
-	CGO_ENABLED=0 staticcheck
+	CGO_ENABLED=0 go fix -diff .
+	CGO_ENABLED=0 go fix .
 	CGO_ENABLED=0 golangci-lint run
+	# CGO_ENABLED=0 staticcheck
 	make -C cmd/$(PROJECT) check
