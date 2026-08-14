@@ -3,7 +3,7 @@ module paepcke.de/tlsinfo
 go 1.26.1
 
 require (
-	golang.org/x/crypto v0.54.0
+	golang.org/x/crypto v0.55.0
 	paepcke.de/certinfo v0.1.55
 	paepcke.de/reportstyle v0.1.28
 )
