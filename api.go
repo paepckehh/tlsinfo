@@ -114,11 +114,11 @@ func ReportHost(host string, t *tls.Config, e *reportstyle.Style) string {
 	t.InsecureSkipVerify = true // skip here to get  tls.ConnectionState()
 	conn, err := tls.DialWithDialer(&net.Dialer{Timeout: _dialWait}, _tcp, addCheckPort(host), t)
 	if err != nil {
-		return "DEBUG:" + err.Error()
+		return "[tlsinfo] [error] [connect] " + host + " -> " + err.Error()
 	}
 	defer func() {
 		if err := conn.Close(); err != nil {
-			fmt.Printf("[certinfo] [error] during connection close: %s", err.Error())
+			fmt.Printf("[tlsinfo] [error] during connection close: %s", err.Error())
 		}
 	}()
 	return ReportConn(conn, e)
@@ -165,6 +165,9 @@ func ReportTlsState(state *tls.ConnectionState, e *reportstyle.Style) string {
 		state = &tls.ConnectionState{}
 	}
 	certReport := &certinfo.Report{Summary: true, Style: e}
+	if e.Raw {
+		certReport.OpenSSL, certReport.PEM = true, true // VERBOSE adds raw PEM / OpenSSL detail to both cert sections
+	}
 	var ts string
 	if len(state.SignedCertificateTimestamps) > 0 {
 		ts = string(bytes.Join(state.SignedCertificateTimestamps, []byte(_linefeed)))
@@ -180,9 +183,6 @@ func ReportTlsState(state *tls.ConnectionState, e *reportstyle.Style) string {
 	s.WriteString(e.L1 + "TLS Uniq ID               " + build(hex.EncodeToString(state.TLSUnique), e))
 	s.WriteString(e.L1 + "TLS Signed Timestamps     " + build(ts, e))
 	s.WriteString(e.L1 + "TLS Verified Cert Chains\n" + build(certinfo.CertStores(state.VerifiedChains, certReport), e))
-	if e.Raw {
-		certReport.OpenSSL, certReport.PEM = true, true
-	}
 	s.WriteString(e.L1 + "TLS Peer Send Certs     \n" + build(certinfo.CertStore(state.PeerCertificates, certReport), e))
 	return s.String()
 }
@@ -223,18 +223,18 @@ func PinHostWithTLS(host string, tlsconfig *tls.Config) string {
 	tlsconfig.InsecureSkipVerify = true // skip here to pin keys trust-on-first-use, even on untrusted chains
 	conn, err := tls.DialWithDialer(&net.Dialer{Timeout: _dialWait}, _tcp, target, tlsconfig)
 	if err != nil {
-		return "[certinfo] [error] [connect] " + target + " -> " + err.Error()
+		return "[tlsinfo] [error] [connect] " + target + " -> " + err.Error()
 	}
 	defer func() {
 		if err := conn.Close(); err != nil {
-			fmt.Printf("[certinfo] [error] during connection close: %s: %s", target, err.Error())
+			fmt.Printf("[tlsinfo] [error] during connection close: %s: %s", target, err.Error())
 		}
 	}()
 	certs := conn.ConnectionState().PeerCertificates
 	if len(certs) > 0 {
 		return certinfo.KeyPinBase64(certs[0])
 	}
-	return "[certinfo] [error] [keypin] [no certificates found] :" + target
+	return "[tlsinfo] [error] [keypin] [no certificates found] " + target
 }
 
 //

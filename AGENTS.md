@@ -32,6 +32,7 @@ api_test.go       offline unit tests (loopback TLS server + OCSP staple)
 generic_test.go   offline unit tests for the unexported helpers
 starttls_test.go  offline unit tests for the STARTTLS upgrades
 cmd/tlsinfo/      CLI main — thin wrapper, all logic lives in the root package
+llms.txt           AI-friendly repo overview (LLM entrypoint, keep in sync)
 ```
 
 Three-layer API in `api.go`, top-down:
@@ -47,7 +48,7 @@ Data flow: hostname → `addCheckPort`/`addStarttlsPort` (append default port, b
 - **Doc comments are one-liners**: `// FuncName ...` — nothing more. Match this.
 - **Section banners**: `//` blank, `// SECTION NAME`, `//` between API groups.
 - **Unexported constants are underscore-prefixed**: `_tcp`, `_sslport`, `_app`.
-- **Errors are embedded in return strings** (`"[certinfo] [error] ..."`), not `(string, error)` tuples. Library API returns plain strings; keep that shape.
+- **Errors are embedded in return strings** (`"[tlsinfo] [error] ..."` / `"[starttls] [error] ..."` — the leading tag names the failing component), not `(string, error)` tuples. Library API returns plain strings; keep that shape.
 - **CLI config is env-vars only, no flags**: `NO_COLOR`, `VERBOSE` (enables raw/PEM/OpenSSL detail), `HTML`, `PINONLY`, `STARTTLS` (protocol identifier: `smtp`, `imap`, `pop3`, `nntp`, `ftp` — also combines with `PINONLY`), `PEMONLY` (**currently a no-op** — `PemHost` call is commented out in `cmd/tlsinfo/main.go`). Env vars are only "on" when set to a **non-empty** value (`isEnv`, per no-color.org: `NO_COLOR=""` keeps colors).
 - **Piped stdin beats argv** in the CLI: check `isPipe()` branch order in `main.go` before changing input handling. Pipe input is whitespace-split via `pipeHosts()` (trims trailing newlines, supports multi-host pipes); `PINONLY`/`PEMONLY`/`STARTTLS` apply to both input paths via the `report()` helper.
 - `gofmt -s` (simplify) formatting; CGO disabled in Makefile, CI, and `.goreleaser.yml`.
@@ -59,6 +60,7 @@ Data flow: hostname → `addCheckPort`/`addStarttlsPort` (append default port, b
 - `ReportHost` **deliberately sets `t.InsecureSkipVerify = true`** — and mutates the caller's `*tls.Config` in place. It must: reporting untrusted/invalid chains is the tool's purpose. Do not "fix" this.
 - `PinHostWithTLS` sets `InsecureSkipVerify` too (TOFU pinning must fetch pins from untrusted/self-signed chains), and every dial (`tls.DialWithDialer` in `ReportHost`/`PinHostWithTLS`, `starttlsDial`) carries a 30s cap (`_dialWait`, defined in `generic.go`) so the CLI cannot hang forever on stalled handshakes.
 - The `//nolint:all` on the `TLS Uniq ID` line in `ReportTlsState` is intentional (kept as informative output despite linter security concerns).
+- `ReportTlsState` applies `VERBOSE` (`e.Raw`) raw/PEM/OpenSSL detail to **both** the verified-chains and peer-certs sections — the flag is set on `certReport` before the first render; don't move it between the two.
 - gopls/`staticcheck` flag ~38 "inefficient string concatenation in WriteString" warnings in `api.go`. Pre-existing and accepted style here — don't rewrite report assembly wholesale.
 - `ReportOcsp` guards on `len(ocspResponse) > 8`; the `// @UPSTREAM` comment about `Response.Status` is load-bearing: it is a plain `int` `{Good=0|Revoked=1|Unknown=2}` (certificate status), NOT `ocsp.ResponseStatus` (protocol status: success/malformed/...) — never re-cast it into `ResponseStatus`.
 - `ReportOcsp` expects the **issuer** cert (`ocsp.ParseResponse` verifies the stapled signature against it): `ReportConn` passes `PeerCertificates[1]`, falling back to `[0]` for leaf-only chains.

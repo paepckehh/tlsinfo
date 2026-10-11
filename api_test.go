@@ -229,7 +229,7 @@ func TestReportHost(t *testing.T) {
 	if out := ReportHost(addr, nil, reportstyle.StyleText()); !strings.Contains(out, "TLS Handshake Finished") {
 		t.Errorf("ReportHost(nil config) must not panic and still render a report, got:\n%s", out)
 	}
-	if out := ReportHost("127.0.0.1:1", &tls.Config{}, reportstyle.StyleText()); !strings.Contains(out, "DEBUG:") {
+	if out := ReportHost("127.0.0.1:1", &tls.Config{}, reportstyle.StyleText()); !strings.Contains(out, "[tlsinfo] [error] [connect]") {
 		t.Errorf("ReportHost() unreachable host must embed the connect error, got:\n%s", out)
 	}
 }

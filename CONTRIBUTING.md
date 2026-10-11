@@ -1,21 +1,34 @@
-# Welcome to the contributing guide
+# Contributing to tlsinfo
 
-## Issues
+Thanks for your interest in improving `tlsinfo`! Issues and pull requests are both welcome — this guide gets you productive in under ten minutes.
 
-* The issue section of this project is open for everyone!
+## Getting started
 
-### Create new issue report
+```shell
+git clone https://github.com/paepckehh/tlsinfo
+cd tlsinfo
 
-* Contribute to the project by create a issue report!
-* New Issue reports to are welcome! 
+make test    # offline unit tests, loopback-only TLS server — no network needed
+make check   # gofmt -w -s, go vet, go fix, golangci-lint (root + cmd/)
+```
 
-### Solve an issue report
+`make examples` and `make all` run the CLI against live hosts (`github.com`, `paepcke.de`).
 
-* Contribute to the project by sovle a issue report!
-* Solving other peoples issue reports are welcome as well!
+## Ground rules
 
-## Pull Request
+- **Keep diffs minimal and focused** — one topic per pull request.
+- **`make test` and `make check` must pass.** `make check` mutates files (`gofmt -w`, `go fix`) — run it locally and commit the result.
+- **Zero-dependency philosophy**: stdlib + `paepcke.de/certinfo` + `paepcke.de/reportstyle` + `golang.org/x/crypto` only. New dependencies need a very strong reason.
+- **No CLI flags**: configuration is env-vars only (`NO_COLOR`, `VERBOSE`, `HTML`, `PINONLY`, `STARTTLS`).
+- **Library API returns strings** — errors are embedded as `[tlsinfo] [error] ...` / `[starttls] [error] ...`, not `(string, error)` tuples.
+- **Commit style**: conventional — `feat:`, `fix:`, `docs:`, `build(deps): bump <module> from X to Y`.
 
-* The Pull Request  section of this project is open for everyone!
-* Contribute to the projects by open an PR request
-* PR requests to fix/update/improve are welcome!
+## Reporting issues
+
+- Include the command you ran, the host (if public), and the output or error you got.
+- A minimal reproduction helps a lot — `tlsinfo <host>` output is usually enough.
+- **Do not open public issues for security vulnerabilities** — see [SECURITY.md](SECURITY.md) instead.
+
+## Releases
+
+Every `v*` tag push triggers a [goreleaser](https://goreleaser.com) build with prebuilt binaries for all platforms. Versioning is `v0.X.Y` — patch bumps for fixes and docs, minor bumps for features.
