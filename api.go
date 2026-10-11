@@ -7,6 +7,7 @@ import (
 	"crypto/x509"
 	"encoding/hex"
 	"fmt"
+	"net"
 	"net/http"
 	"strconv"
 	"strings"
@@ -111,7 +112,7 @@ func ReportHost(host string, t *tls.Config, e *reportstyle.Style) string {
 		t = &tls.Config{}
 	}
 	t.InsecureSkipVerify = true // skip here to get  tls.ConnectionState()
-	conn, err := tls.Dial(_tcp, addCheckPort(host), t)
+	conn, err := tls.DialWithDialer(&net.Dialer{Timeout: _dialWait}, _tcp, addCheckPort(host), t)
 	if err != nil {
 		return "DEBUG:" + err.Error()
 	}
@@ -216,7 +217,11 @@ func PinVerifyHostWithTLS(keyPin, host string, tlsconfig *tls.Config) bool {
 // PinHostWithTLS ...
 func PinHostWithTLS(host string, tlsconfig *tls.Config) string {
 	target := addCheckPort(host)
-	conn, err := tls.Dial(_tcp, target, tlsconfig)
+	if tlsconfig == nil {
+		tlsconfig = &tls.Config{}
+	}
+	tlsconfig.InsecureSkipVerify = true // skip here to pin keys trust-on-first-use, even on untrusted chains
+	conn, err := tls.DialWithDialer(&net.Dialer{Timeout: _dialWait}, _tcp, target, tlsconfig)
 	if err != nil {
 		return "[certinfo] [error] [connect] " + target + " -> " + err.Error()
 	}

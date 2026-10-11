@@ -278,6 +278,12 @@ func TestPinHostWithTLS(t *testing.T) {
 	if got := PinHostWithTLS(addr, &tls.Config{InsecureSkipVerify: true}); got != want {
 		t.Errorf("PinHostWithTLS() = %q, want %q", got, want)
 	}
+	if got := PinHost(addr); got != want {
+		t.Errorf("PinHost() = %q, want %q: trust-on-first-use must pin untrusted chains", got, want)
+	}
+	if !PinVerifyHost(want, addr) {
+		t.Error("PinVerifyHost() = false, want true for matching key pin")
+	}
 	if !PinVerifyHostWithTLS(want, addr, &tls.Config{InsecureSkipVerify: true}) {
 		t.Error("PinVerifyHostWithTLS() = false, want true for matching key pin")
 	}

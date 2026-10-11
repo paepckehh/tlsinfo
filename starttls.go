@@ -24,35 +24,36 @@ const (
 
 // const
 const (
-	_crlf         = "\r\n"
-	_starttlsWait = 30 * time.Second
+	_crlf = "\r\n"
 )
 
-// default plaintext ports per protocol
-var _starttlsPort = map[string]string{
-	SMTP: ":587",
-	IMAP: ":143",
-	POP3: ":110",
-	NNTP: ":119",
-	FTP:  ":21",
+// starttlsDef ...
+type starttlsDef struct {
+	port     string
+	sequence [][]string
 }
 
-// plaintext negotiation sequences per protocol: send command, want response prefix
-var _starttlsSequence = map[string][][]string{
-	SMTP: {{"", "220"}, {"EHLO tlsinfo", "250"}, {"STARTTLS", "220"}},
-	IMAP: {{"", "* OK"}, {"A001 STARTTLS", "A001 OK"}},
-	POP3: {{"", "+OK"}, {"STLS", "+OK"}},
-	NNTP: {{"", "20"}, {"STARTTLS", "382"}},
-	FTP:  {{"", "220"}, {"AUTH TLS", "234"}},
+// default plaintext ports plus negotiation sequences per protocol: send command, want response prefix
+var _starttlsProtocols = map[string]starttlsDef{
+	SMTP: {port: ":587", sequence: [][]string{{"", "220"}, {"EHLO tlsinfo", "250"}, {"STARTTLS", "220"}}},
+	IMAP: {port: ":143", sequence: [][]string{{"", "* OK"}, {"A001 STARTTLS", "A001 OK"}}},
+	POP3: {port: ":110", sequence: [][]string{{"", "+OK"}, {"STLS", "+OK"}}},
+	NNTP: {port: ":119", sequence: [][]string{{"", "20"}, {"STARTTLS", "382"}}},
+	FTP:  {port: ":21", sequence: [][]string{{"", "220"}, {"AUTH TLS", "234"}}},
 }
 
 // addStarttlsPort ...
 func addStarttlsPort(proto, host string) (string, error) {
-	port, ok := _starttlsPort[proto]
+	def, ok := _starttlsProtocols[proto]
 	if !ok {
-		return "", fmt.Errorf("[starttls] [error] [unsupported protocol: %q] [supported: %s, %s, %s, %s, %s]", proto, SMTP, IMAP, POP3, NNTP, FTP)
+		return "", starttlsUnsupported(proto)
 	}
-	return addPort(host, port), nil
+	return addPort(host, def.port), nil
+}
+
+// starttlsUnsupported ...
+func starttlsUnsupported(proto string) error {
+	return fmt.Errorf("[starttls] [error] [unsupported protocol: %q] [supported: %s, %s, %s, %s, %s]", proto, SMTP, IMAP, POP3, NNTP, FTP)
 }
 
 // starttlsDial ...
@@ -69,7 +70,7 @@ func starttlsDial(proto, host string, t *tls.Config) (*tls.Conn, error) {
 	if err != nil {
 		return nil, err
 	}
-	if err := raw.SetDeadline(time.Now().Add(_starttlsWait)); err != nil {
+	if err := raw.SetDeadline(time.Now().Add(_dialWait)); err != nil {
 		_ = raw.Close()
 		return nil, err
 	}
@@ -92,13 +93,13 @@ func starttlsDial(proto, host string, t *tls.Config) (*tls.Conn, error) {
 
 // starttlsUpgrade ...
 func starttlsUpgrade(proto string, conn net.Conn) error {
-	seq, ok := _starttlsSequence[proto]
+	def, ok := _starttlsProtocols[proto]
 	if !ok {
-		return fmt.Errorf("[starttls] [error] [unsupported protocol: %q] [supported: %s, %s, %s, %s, %s]", proto, SMTP, IMAP, POP3, NNTP, FTP)
+		return starttlsUnsupported(proto)
 	}
 	r := bufio.NewReader(conn)
-	for _, step := range seq {
-		if _, err := reply(r, conn, step[0], step[1]); err != nil {
+	for _, step := range def.sequence {
+		if err := reply(r, conn, step[0], step[1]); err != nil {
 			return err
 		}
 	}
@@ -106,25 +107,25 @@ func starttlsUpgrade(proto string, conn net.Conn) error {
 }
 
 // reply ...
-func reply(r *bufio.Reader, conn net.Conn, send, want string) (string, error) {
+func reply(r *bufio.Reader, conn net.Conn, send, want string) error {
 	if send != "" {
 		if _, err := conn.Write([]byte(send + _crlf)); err != nil {
-			return "", fmt.Errorf("[starttls] [error] [unable to send: %q] %s", send, err.Error())
+			return fmt.Errorf("[starttls] [error] [unable to send: %q] %s", send, err.Error())
 		}
 	}
 	line, err := readLine(r)
 	if err != nil {
-		return "", fmt.Errorf("[starttls] [error] [unable to read response of: %q] %s", send, err.Error())
+		return fmt.Errorf("[starttls] [error] [unable to read response of: %q] %s", send, err.Error())
 	}
 	for {
 		if !strings.HasPrefix(line, want) {
-			return line, fmt.Errorf("[starttls] [error] [unexpected response: %q] [want prefix: %q]", line, want)
+			return fmt.Errorf("[starttls] [error] [unexpected response: %q] [want prefix: %q]", line, want)
 		}
 		if len(line) <= len(want) || line[len(want)] != '-' {
-			return line, nil
+			return nil
 		}
 		if line, err = readLine(r); err != nil {
-			return line, fmt.Errorf("[starttls] [error] [unable to read response of: %q] %s", send, err.Error())
+			return fmt.Errorf("[starttls] [error] [unable to read response of: %q] %s", send, err.Error())
 		}
 	}
 }

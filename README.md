@@ -1,13 +1,16 @@
 <div align="center">
 
-# tlsinfo
+# 🔐 tlsinfo
 
-**Analyze TLS connections from the terminal — or from your own Go code.**
+**TLS analysis in one command — or one function call.**
+
+Handshake state, certificate chains, key pins, OCSP status and crypto hygiene for any host.
+A tiny CLI **and** a pure Go library. No flags, no config files, no bloat.
 
 [![Go Reference](https://pkg.go.dev/badge/paepcke.de/tlsinfo.svg)](https://pkg.go.dev/paepcke.de/tlsinfo)
 [![Go Report Card](https://goreportcard.com/badge/paepcke.de/tlsinfo)](https://goreportcard.com/report/paepcke.de/tlsinfo)
 [![License](https://img.shields.io/github/license/paepckehh/tlsinfo)](https://github.com/paepckehh/tlsinfo/blob/master/LICENSE)
-[![Release](https://img.shields.io/github/v/release/paepckehh/tlsinfo)](https://github.com/paepckehh/tlsinfo/releases/latest)
+[![Release](https://img.shields.io/github/v/release/paepckehh/tlsinfo?color=success)](https://github.com/paepckehh/tlsinfo/releases/latest)
 [![Go Build](https://github.com/paepckehh/tlsinfo/actions/workflows/golang.yml/badge.svg)](https://github.com/paepckehh/tlsinfo/actions/workflows/golang.yml)
 [![Lint](https://github.com/paepckehh/tlsinfo/actions/workflows/golangci-lint.yml/badge.svg)](https://github.com/paepckehh/tlsinfo/actions/workflows/golangci-lint.yml)
 [![built with nix](https://builtwithnix.org/badge.svg)](https://search.nixos.org/packages?channel=unstable&show=tlsinfo&from=0&size=50&sort=relevance&type=packages&query=tlsinfo)
@@ -18,31 +21,31 @@
 
 ---
 
-## Why
+## ✨ Features
 
-Tired of remembering all the command-line switches of `openssl s_client` / `certutil` to
-analyze a TLS session or a trust chain? Just enter the hostname.
+- 📄 **Full chain analysis** — validates, parses and reports certificate chains, keys, pins and cryptographic states
+- 🤝 **Handshake state** — TLS version, cipher suite, ALPN, resumption, SCT timestamps, with instant `[SECURITY ALERT]` / `[OK]` verdicts
+- 🚀 **STARTTLS testing** — upgrade plaintext connections and analyze the TLS layer (SMTP, IMAP, POP3, NNTP, FTP)
+- 📌 **Key pins** — SPKI base64 pins to build or verify trust-on-first-use (TOFU) pinning, even on untrusted or self-signed chains
+- 🛡️ **OCSP status** — stapled responses parsed and verified against the issuer, revoked certificates flagged as `[SECURITY ALERT]`
+- 🧪 **Works everywhere** — 100% pure Go: stdlib + `paepcke.de/certinfo` + `paepcke.de/reportstyle` + `golang.org/x/crypto`, nothing else
+- 🎨 **Output your way** — ANSI console, plain ASCII, HTML, raw/PEM/OpenSSL detail, or fully custom styles
+- 🔌 **CLI *or* library** — same core, [library API](#-library), compatible with `certinfo`, `dnsinfo`, ...
 
-- Validates, parses and reports certificate chains, keys, pins, cryptographic states
-- Handshake state: TLS version, cipher suite, ALPN, resumption, SCT timestamps
-- STARTTLS testing: upgrade plaintext protocol connections (SMTP, IMAP, POP3, NNTP, FTP)
-- OCSP status (stapled responses), with `[SECURITY ALERT]` verdicts on revoked certificates
-- Key pins (SPKI, base64) to build or verify trust-on-first-use pinning
-- Alerts about anomalies, broken or deprecated cryptographic functions
-- 100% pure Go — stdlib + `paepcke.de/certinfo` + `paepcke.de/reportstyle` + `golang.org/x/crypto` only
-- Use as CLI **or** as library ([API](#api)); compatible with `certinfo`, `dnsinfo`, ...
-
-## ⚡️ Quickstart
+## 🚀 Quickstart
 
 ```shell
-# run via go
+# try it instantly
 go run paepcke.de/tlsinfo/cmd/tlsinfo@latest github.com
 
-# install via go
+# install it
 go install paepcke.de/tlsinfo/cmd/tlsinfo@latest
 ```
 
-Prebuilt binaries: [github.com/paepckehh/tlsinfo/releases](https://github.com/paepckehh/tlsinfo/releases)
+<details>
+<summary>Other install options</summary>
+
+Prebuilt binaries for every platform: [releases](https://github.com/paepckehh/tlsinfo/releases/latest)
 
 NixOS:
 
@@ -54,9 +57,11 @@ nix-shell -p tlsinfo
 environment.systemPackages = [ pkgs.tlsinfo ];
 ```
 
+</details>
+
 ## 📖 Usage
 
-```shell
+```console
 $ tlsinfo github.com
 NET Local Address          : 10.20.0.99
 NET Local Port             : 39360
@@ -80,7 +85,7 @@ TLS Verified Cert Chains
   [...]
 ```
 
-Multiple hosts, or a list piped via stdin — one report per host:
+One report per host — pass multiple hosts, or pipe a list via stdin:
 
 ```shell
 tlsinfo github.com paepcke.de
@@ -88,18 +93,39 @@ echo github.com | tlsinfo
 cat hosts.txt | tlsinfo
 ```
 
+### STARTTLS
+
+Analyze mail or news servers that speak TLS only after an in-band upgrade:
+
+```shell
+STARTTLS=smtp tlsinfo smtp.gmail.com:587
+STARTTLS=imap tlsinfo mail.example.com
+```
+
+### Key Pins
+
+```shell
+# fetch the base64 SPKI key pin of a host (TOFU first use)
+PINONLY=1 tlsinfo github.com
+
+# works via STARTTLS too
+PINONLY=1 STARTTLS=smtp tlsinfo smtp.gmail.com:587
+```
+
 ### Environment Variables
 
-| Variable  | Effect                                                                   |
-|-----------|--------------------------------------------------------------------------|
-| `NO_COLOR`| plain ASCII output, no ANSI colors (post-processing, logging, ...)       |
-| `VERBOSE` | add raw / PEM / OpenSSL certificate details                              |
-| `HTML`     | HTML output (for web pages, reports, ...)                                |
-| `PINONLY`  | print only the base64 SPKI key pin(s) of the host(s)                    |
-| `PEMONLY`  | reserved, currently inactive                                            |
+The CLI is configured entirely via environment variables (empty value = off, see [no-color.org](https://no-color.org)):
+
+| Variable  | Effect                                                                       |
+|-----------|------------------------------------------------------------------------------|
+| `NO_COLOR` | plain ASCII output, no ANSI colors (post-processing, logging, ...)          |
+| `VERBOSE`  | add raw / PEM / OpenSSL certificate details                                  |
+| `HTML`     | HTML output (for web pages, reports, ...)                                    |
+| `PINONLY`  | print only the base64 SPKI key pin(s) of the host(s)                          |
+| `PEMONLY`  | reserved, currently inactive                                                 |
 | `STARTTLS` | test STARTTLS instead of implicit TLS: `smtp`, `imap`, `pop3`, `nntp`, `ftp` |
 
-### Library
+## 🔌 Library
 
 Full TLS state report of a host:
 
@@ -158,7 +184,8 @@ plain text, ANSI color console, HTML, raw, or fully custom.
 
 ## 📚 Documentation
 
-[pkg.go.dev/paepcke.de/tlsinfo](https://pkg.go.dev/paepcke.de/tlsinfo)
+- [pkg.go.dev/paepcke.de/tlsinfo](https://pkg.go.dev/paepcke.de/tlsinfo)
+- Found a security issue? See [SECURITY.md](SECURITY.md)
 
 ## 🛡 License
 
@@ -178,6 +205,6 @@ See [LICENSE](https://github.com/paepckehh/tlsinfo/blob/master/LICENSE) for deta
 }
 ```
 
-## 🤝 Contribution
+## 🤝 Contributing
 
 Yes, please! PRs welcome! See [CONTRIBUTING.md](CONTRIBUTING.md).

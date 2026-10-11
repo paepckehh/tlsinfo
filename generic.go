@@ -3,6 +3,7 @@ package tlsinfo
 import (
 	"net"
 	"strings"
+	"time"
 
 	"paepcke.de/reportstyle"
 )
@@ -19,6 +20,7 @@ const (
 	_space       = " "
 	_linefeed    = "\n"
 	_doublepoint = ":"
+	_dialWait    = 30 * time.Second
 )
 
 // build ...

@@ -16,6 +16,10 @@ func TestIsEnv(t *testing.T) {
 	if isEnv("TLSINFO_TEST_UNSET") {
 		t.Error("isEnv() = true, want false for unset environment variable")
 	}
+	t.Setenv("TLSINFO_TEST_EMPTY", "")
+	if isEnv("TLSINFO_TEST_EMPTY") {
+		t.Error("isEnv() = true, want false for empty environment variable")
+	}
 }
 
 // TestGetPipe ...

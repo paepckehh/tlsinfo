@@ -111,6 +111,6 @@ func isOsArgs() bool {
 
 // isEnv ...
 func isEnv(in string) bool {
-	_, ok := os.LookupEnv(in)
-	return ok
+	val, ok := os.LookupEnv(in)
+	return ok && val != "" // empty value means off, see https://no-color.org
 }
