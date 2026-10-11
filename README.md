@@ -25,6 +25,7 @@ analyze a TLS session or a trust chain? Just enter the hostname.
 
 - Validates, parses and reports certificate chains, keys, pins, cryptographic states
 - Handshake state: TLS version, cipher suite, ALPN, resumption, SCT timestamps
+- STARTTLS testing: upgrade plaintext protocol connections (SMTP, IMAP, POP3, NNTP, FTP)
 - OCSP status (stapled responses), with `[SECURITY ALERT]` verdicts on revoked certificates
 - Key pins (SPKI, base64) to build or verify trust-on-first-use pinning
 - Alerts about anomalies, broken or deprecated cryptographic functions
@@ -94,8 +95,9 @@ cat hosts.txt | tlsinfo
 | `NO_COLOR`| plain ASCII output, no ANSI colors (post-processing, logging, ...)       |
 | `VERBOSE` | add raw / PEM / OpenSSL certificate details                              |
 | `HTML`     | HTML output (for web pages, reports, ...)                                |
-| `PINONLY` | print only the base64 SPKI key pin(s) of the host(s)                    |
-| `PEMONLY` | reserved, currently inactive                                            |
+| `PINONLY`  | print only the base64 SPKI key pin(s) of the host(s)                    |
+| `PEMONLY`  | reserved, currently inactive                                            |
+| `STARTTLS` | test STARTTLS instead of implicit TLS: `smtp`, `imap`, `pop3`, `nntp`, `ftp` |
 
 ### Library
 
@@ -128,6 +130,13 @@ Verify a host key pin (SPKI trust-on-first-use):
 ok := tlsinfo.PinVerifyHost("/wiL5vgOLgwED41WS0DNF8QiTBVR/P41Kd163tmFxK0=", "github.com")
 ```
 
+Test a mail server via STARTTLS (SMTP, IMAP, POP3, NNTP, FTP):
+
+```go
+report := tlsinfo.ReportStartTLSText("smtp.gmail.com:587", tlsinfo.SMTP)
+pin := tlsinfo.PinStartTLS("smtp.gmail.com:587", tlsinfo.SMTP, &tls.Config{})
+```
+
 ### API
 
 | Function                                     | Input                                    |
@@ -137,7 +146,10 @@ ok := tlsinfo.PinVerifyHost("/wiL5vgOLgwED41WS0DNF8QiTBVR/P41Kd163tmFxK0=", "git
 | `ReportTlsStateText` / `ReportTlsStateHTML` / `ReportTlsState` | `*tls.ConnectionState`       |
 | `ReportHttpRequestText` / `ReportHttpRequestHTML` / `ReportHttpRequest` | server-side `*http.Request` |
 | `ReportOcsp`                                 | `*tls.Conn` + issuer `*x509.Certificate`  |
+| `ReportStartTLS` / `ReportStartTLSText` / `ReportStartTLSHTML` | hostname + `smtp`/`imap`/`pop3`/`nntp`/`ftp` |
 | `PinHost`, `PinHostWithTLS`                  | hostname (+ `tls.Config`)                 |
+| `PinStartTLS`                                | hostname + protocol (+ `tls.Config`)       |
+| `PinVerifyStartTLS`                          | key pin + hostname + protocol (+ `tls.Config`) |
 | `PinVerifyHost`, `PinVerifyHostWithTLS`      | key pin + hostname                        |
 | `PinVerifyConn`, `PinVerifyState`            | key pin + `*tls.Conn` / `*tls.ConnectionState` |
 

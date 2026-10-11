@@ -15,13 +15,14 @@ import (
 
 // const
 const (
-	_app     = "[tlsinfo] "
-	_err     = "[error] "
-	_html    = "HTML"
-	_noColor = "NO_COLOR"
-	_pemonly = "PEMONLY"
-	_pinonly = "PINONLY"
-	_verbose = "VERBOSE"
+	_app      = "[tlsinfo] "
+	_err      = "[error] "
+	_html     = "HTML"
+	_noColor  = "NO_COLOR"
+	_pemonly  = "PEMONLY"
+	_pinonly  = "PINONLY"
+	_starttls = "STARTTLS"
+	_verbose  = "VERBOSE"
 )
 
 // main ...
@@ -56,11 +57,18 @@ func main() {
 
 // report ...
 func report(host string, style *reportstyle.Style) {
+	proto := os.Getenv(_starttls)
 	switch {
 	case isEnv(_pinonly):
+		if proto != "" {
+			out(tlsinfo.PinStartTLS(host, proto, &tls.Config{}))
+			return
+		}
 		out(tlsinfo.PinHost(host))
 	case isEnv(_pemonly):
 		// out(tlsinfo.PemHost(host))
+	case proto != "":
+		out(tlsinfo.ReportStartTLS(host, proto, &tls.Config{}, style))
 	default:
 		out(tlsinfo.ReportHost(host, &tls.Config{}, style))
 	}
@@ -75,7 +83,10 @@ func out(msg string) {
 
 // isPipe ...
 func isPipe() bool {
-	out, _ := os.Stdin.Stat()
+	out, err := os.Stdin.Stat()
+	if err != nil {
+		return false
+	}
 	return out.Mode()&os.ModeCharDevice == 0
 }
 

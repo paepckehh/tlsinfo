@@ -231,3 +231,58 @@ func PinHostWithTLS(host string, tlsconfig *tls.Config) string {
 	}
 	return "[certinfo] [error] [keypin] [no certificates found] :" + target
 }
+
+//
+// SIMPLE API - STARTTLS REPORTER
+//
+
+// ReportStartTLSText ...
+func ReportStartTLSText(host, protocol string) string {
+	return ReportStartTLS(host, protocol, &tls.Config{}, reportstyle.StyleText())
+}
+
+// ReportStartTLSHTML ...
+func ReportStartTLSHTML(host, protocol string) string {
+	return ReportStartTLS(host, protocol, &tls.Config{}, reportstyle.StyleHTML())
+}
+
+// PinStartTLS ...
+func PinStartTLS(host, protocol string, t *tls.Config) string {
+	conn, err := starttlsDial(protocol, host, t)
+	if err != nil {
+		return "[starttls] [error] [connect] " + host + " -> " + err.Error()
+	}
+	defer func() {
+		if err := conn.Close(); err != nil {
+			fmt.Printf("[starttls] [error] during connection close: %s", err.Error())
+		}
+	}()
+	certs := conn.ConnectionState().PeerCertificates
+	if len(certs) > 0 {
+		return certinfo.KeyPinBase64(certs[0])
+	}
+	return "[starttls] [error] [keypin] [no certificates found] " + host
+}
+
+// PinVerifyStartTLS ...
+func PinVerifyStartTLS(keyPin, host, protocol string, t *tls.Config) bool {
+	return keyPin == PinStartTLS(host, protocol, t)
+}
+
+//
+// GENERIC BACKEND - STARTTLS
+//
+
+// ReportStartTLS ...
+func ReportStartTLS(host, protocol string, t *tls.Config, e *reportstyle.Style) string {
+	conn, err := starttlsDial(protocol, host, t)
+	if err != nil {
+		return "[starttls] [error] [connect] " + host + " -> " + err.Error()
+	}
+	defer func() {
+		if err := conn.Close(); err != nil {
+			fmt.Printf("[starttls] [error] during connection close: %s", err.Error())
+		}
+	}()
+	return ReportConn(conn, e)
+}

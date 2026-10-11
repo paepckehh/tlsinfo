@@ -13,11 +13,12 @@ import (
 
 // const
 const (
-	_tcp      = "tcp"
-	_sslport  = ":443"
-	_none     = "[none]"
-	_space    = " "
-	_linefeed = "\n"
+	_tcp         = "tcp"
+	_sslport     = ":443"
+	_none        = "[none]"
+	_space       = " "
+	_linefeed    = "\n"
+	_doublepoint = ":"
 )
 
 // build ...
@@ -43,12 +44,20 @@ func splitAddr(addr string) (string, string) {
 	return host, port
 }
 
-// addCheckPort ...
-func addCheckPort(host string) string {
+// addPort ...
+func addPort(host, port string) string {
 	if _, _, err := net.SplitHostPort(host); err == nil {
 		return host
 	}
-	return host + _sslport
+	if strings.Contains(host, _doublepoint) && !strings.HasPrefix(host, "[") {
+		return "[" + host + "]" + port // unbracketed ipv6 literal
+	}
+	return host + port
+}
+
+// addCheckPort ...
+func addCheckPort(host string) string {
+	return addPort(host, _sslport)
 }
 
 // version ...

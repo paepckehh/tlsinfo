@@ -71,6 +71,7 @@ func TestAddCheckPort(t *testing.T) {
 		{"keeps explicit port", "github.com:8443", "github.com:8443"},
 		{"keeps ip port", "127.0.0.1:9", "127.0.0.1:9"},
 		{"appends port to bracketed ipv6", "[2001:db8::1]", "[2001:db8::1]:443"},
+		{"appends port to bare ipv6 literal", "2001:db8::1", "[2001:db8::1]:443"},
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
