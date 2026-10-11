@@ -15,7 +15,6 @@ A tiny CLI **and** a pure Go library. No flags, no config files, no bloat.
 [![built with nix](https://builtwithnix.org/badge.svg)](https://search.nixos.org/packages?channel=unstable&show=tlsinfo&from=0&size=50&sort=relevance&type=packages&query=tlsinfo)
 
 [![Go Build](https://github.com/paepckehh/tlsinfo/actions/workflows/golang.yml/badge.svg)](https://github.com/paepckehh/tlsinfo/actions/workflows/golang.yml)
-[![Lint](https://github.com/paepckehh/tlsinfo/actions/workflows/golangci-lint.yml/badge.svg)](https://github.com/paepckehh/tlsinfo/actions/workflows/golangci-lint.yml)
 [![CodeQL](https://github.com/paepckehh/tlsinfo/actions/workflows/codeql.yml/badge.svg)](https://github.com/paepckehh/tlsinfo/actions/workflows/codeql.yml)
 
 [![Stars](https://img.shields.io/github/stars/paepckehh/tlsinfo?style=flat&color=ffd700)](https://github.com/paepckehh/tlsinfo/stargazers)
