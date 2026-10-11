@@ -11,7 +11,10 @@ deps:
 	go mod init paepcke.de/$(PROJECT)
 	go mod tidy -v	
 
-check: 
+test:
+	CGO_ENABLED=0 go test ./...
+
+check:
 	gofmt -w -s .
 	CGO_ENABLED=0 go vet .
 	CGO_ENABLED=0 go fix -diff .

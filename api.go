@@ -8,6 +8,7 @@ import (
 	"encoding/hex"
 	"fmt"
 	"net/http"
+	"strconv"
 	"strings"
 
 	"golang.org/x/crypto/ocsp"
@@ -106,6 +107,9 @@ func PinVerifyState(keyPin string, state *tls.ConnectionState) bool {
 
 // ReportHost ...
 func ReportHost(host string, t *tls.Config, e *reportstyle.Style) string {
+	if t == nil {
+		t = &tls.Config{}
+	}
 	t.InsecureSkipVerify = true // skip here to get  tls.ConnectionState()
 	conn, err := tls.Dial(_tcp, addCheckPort(host), t)
 	if err != nil {
@@ -122,19 +126,19 @@ func ReportHost(host string, t *tls.Config, e *reportstyle.Style) string {
 // ReportConn ...
 func ReportConn(conn *tls.Conn, e *reportstyle.Style) string {
 	state := conn.ConnectionState()
-	localIP := strings.Split(conn.LocalAddr().String(), _doublepoint)
-	remoteIP := strings.Split(conn.RemoteAddr().String(), _doublepoint)
+	localHost, localPort := splitAddr(conn.LocalAddr().String())
+	remoteHost, remotePort := splitAddr(conn.RemoteAddr().String())
 	var s strings.Builder
-	if len(localIP) > 1 {
-		s.WriteString(e.L1 + "NET Local Address         " + e.L2 + localIP[0] + e.LE)
-		s.WriteString(e.L1 + "NET Local Port            " + e.L2 + localIP[1] + e.LE)
-	}
-	if len(remoteIP) > 1 {
-		s.WriteString(e.L1 + "NET Remote Address        " + e.L2 + remoteIP[0] + e.LE)
-		s.WriteString(e.L1 + "NET Remote Port           " + e.L2 + remoteIP[1] + e.LE)
-	}
+	s.WriteString(e.L1 + "NET Local Address         " + e.L2 + localHost + e.LE)
+	s.WriteString(e.L1 + "NET Local Port            " + e.L2 + localPort + e.LE)
+	s.WriteString(e.L1 + "NET Remote Address        " + e.L2 + remoteHost + e.LE)
+	s.WriteString(e.L1 + "NET Remote Port           " + e.L2 + remotePort + e.LE)
 	if len(state.PeerCertificates) > 0 {
-		if msg := ReportOcsp(conn, state.PeerCertificates[0]); len(msg) > 0 {
+		issuer := state.PeerCertificates[0]
+		if len(state.PeerCertificates) > 1 {
+			issuer = state.PeerCertificates[1]
+		}
+		if msg := ReportOcsp(conn, issuer); len(msg) > 0 {
 			s.WriteString(e.L1 + "TLS OCSP Status           " + build(msg, e))
 		}
 	}
@@ -144,29 +148,31 @@ func ReportConn(conn *tls.Conn, e *reportstyle.Style) string {
 
 // ReportHttpRequest ...
 func ReportHttpRequest(q *http.Request, e *reportstyle.Style) string {
-	state := q.TLS
-	remoteIP := strings.Split(q.RemoteAddr, _doublepoint)
+	remoteHost, remotePort := splitAddr(q.RemoteAddr)
 	var s strings.Builder
-	s.WriteString(e.L1 + "NET Remote address        " + e.L2 + remoteIP[0] + e.LE)
-	s.WriteString(e.L1 + "NET Remote port           " + e.L2 + remoteIP[1] + e.LE)
+	s.WriteString(e.L1 + "NET Remote address        " + e.L2 + remoteHost + e.LE)
+	s.WriteString(e.L1 + "NET Remote port           " + e.L2 + remotePort + e.LE)
 	s.WriteString(e.L1 + "HTTP Protocol             " + e.L2 + q.Proto + e.LE)
 	s.WriteString(e.L1 + "HTTP Transfer Encoding    " + e.L2 + strings.Join(q.TransferEncoding, _space) + e.LE)
-	s.WriteString(ReportTlsState(state, e))
+	s.WriteString(ReportTlsState(q.TLS, e))
 	return s.String()
 }
 
 // ReportTlsState ...
 func ReportTlsState(state *tls.ConnectionState, e *reportstyle.Style) string {
+	if state == nil {
+		state = &tls.ConnectionState{}
+	}
 	certReport := &certinfo.Report{Summary: true, Style: e}
 	var ts string
 	if len(state.SignedCertificateTimestamps) > 0 {
 		ts = string(bytes.Join(state.SignedCertificateTimestamps, []byte(_linefeed)))
 	}
 	var s strings.Builder
-	s.WriteString(e.L1 + "TLS Handshake Finished    " + e.L2 + valid(state.HandshakeComplete) + e.LE)
+	s.WriteString(e.L1 + "TLS Handshake Finished    " + e.L2 + strconv.FormatBool(state.HandshakeComplete) + e.LE)
 	s.WriteString(e.L1 + "TLS Version               " + e.L2 + version(state.Version, true) + e.LE)
 	s.WriteString(e.L1 + "TLS ALPN                  " + e.L2 + state.NegotiatedProtocol + e.LE)
-	s.WriteString(e.L1 + "TLS Resumed               " + e.L2 + valid(state.DidResume) + e.LE)
+	s.WriteString(e.L1 + "TLS Resumed               " + e.L2 + strconv.FormatBool(state.DidResume) + e.LE)
 	s.WriteString(e.L1 + "TLS Server Name           " + e.L2 + state.ServerName + e.LE)
 	s.WriteString(e.L1 + "TLS Cipher Suite          " + e.L2 + tls.CipherSuiteName(state.CipherSuite) + e.LE)
 	//nolint:all - keep as informative point, besides linter correct security concerns
@@ -188,8 +194,16 @@ func ReportOcsp(conn *tls.Conn, issuerCert *x509.Certificate) string {
 		if err != nil {
 			return err.Error()
 		}
-		// @UPSTREAM golang.org/x/ocsp, type Response struct Status is not type int but type ResponseStatus
-		return ocsp.ResponseStatus(r.Status).String()
+		// @UPSTREAM golang.org/x/crypto/ocsp: Response.Status is plain int {Good=0|Revoked=1|Unknown=2}, NOT type ResponseStatus (success/malformed/...)
+		switch r.Status {
+		case ocsp.Good:
+			return "Good [OK]"
+		case ocsp.Revoked:
+			return "Revoked [SECURITY ALERT]"
+		case ocsp.Unknown:
+			return "Unknown [WARNING]"
+		}
+		return "Invalid OCSP Status Token"
 	}
 	return hex.EncodeToString(ocspResponse)
 }

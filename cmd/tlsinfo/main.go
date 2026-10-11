@@ -7,7 +7,7 @@ import (
 	"io"
 	"log"
 	"os"
-	"syscall"
+	"strings"
 
 	"paepcke.de/reportstyle"
 	"paepcke.de/tlsinfo"
@@ -15,14 +15,13 @@ import (
 
 // const
 const (
-	_app      = "[tlsinfo] "
-	_err      = "[error] "
-	_html     = "HTML"
-	_noColor  = "NO_COLOR"
-	_verbose  = "VERBOSE"
-	_pemonly  = "PEMONLY"
-	_pinonly  = "PINONLY"
-	_linefeed = "\n"
+	_app     = "[tlsinfo] "
+	_err     = "[error] "
+	_html    = "HTML"
+	_noColor = "NO_COLOR"
+	_pemonly = "PEMONLY"
+	_pinonly = "PINONLY"
+	_verbose = "VERBOSE"
 )
 
 // main ...
@@ -39,18 +38,12 @@ func main() {
 	}
 	switch {
 	case isPipe():
-		out(tlsinfo.ReportHost(getPipe(), &tls.Config{}, style))
+		for _, host := range pipeHosts() {
+			report(host, style)
+		}
 	case isOsArgs():
-		for i := 1; i < len(os.Args); i++ {
-			switch {
-			case isEnv(_pinonly):
-				out(tlsinfo.PinHost(os.Args[i]))
-				continue
-			case isEnv(_pemonly):
-				// out(tlsinfo.PemHost(os.Args[i]))
-				continue
-			}
-			out(tlsinfo.ReportHost(os.Args[i], &tls.Config{}, style))
+		for _, host := range os.Args[1:] {
+			report(host, style)
 		}
 	default:
 		log.Fatal(_app + _err + "no pipe or input parameter found, example: tlsinfo github.com")
@@ -60,6 +53,18 @@ func main() {
 //
 // LITTLE GENERIC HELPER SECTION
 //
+
+// report ...
+func report(host string, style *reportstyle.Style) {
+	switch {
+	case isEnv(_pinonly):
+		out(tlsinfo.PinHost(host))
+	case isEnv(_pemonly):
+		// out(tlsinfo.PemHost(host))
+	default:
+		out(tlsinfo.ReportHost(host, &tls.Config{}, style))
+	}
+}
 
 // out ...
 func out(msg string) {
@@ -72,6 +77,11 @@ func out(msg string) {
 func isPipe() bool {
 	out, _ := os.Stdin.Stat()
 	return out.Mode()&os.ModeCharDevice == 0
+}
+
+// pipeHosts ...
+func pipeHosts() []string {
+	return strings.Fields(getPipe())
 }
 
 // getPipe ...
@@ -88,10 +98,8 @@ func isOsArgs() bool {
 	return len(os.Args) > 1
 }
 
-// isEnv
+// isEnv ...
 func isEnv(in string) bool {
-	if _, ok := syscall.Getenv(in); ok {
-		return true
-	}
-	return false
+	_, ok := os.LookupEnv(in)
+	return ok
 }

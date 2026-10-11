@@ -1,6 +1,7 @@
 package tlsinfo
 
 import (
+	"net"
 	"strings"
 
 	"paepcke.de/reportstyle"
@@ -12,23 +13,12 @@ import (
 
 // const
 const (
-	_tcp         = "tcp"
-	_tcp4        = "tcp4"
-	_tcp6        = "tcp6"
-	_sslport     = ":443"
-	_none        = "[none]"
-	_space       = " "
-	_linefeed    = "\n"
-	_doublepoint = ":"
+	_tcp      = "tcp"
+	_sslport  = ":443"
+	_none     = "[none]"
+	_space    = " "
+	_linefeed = "\n"
 )
-
-// valid ...
-func valid(state bool) string {
-	if state {
-		return "true"
-	}
-	return "false"
-}
 
 // build ...
 func build(in string, e *reportstyle.Style) string {
@@ -41,9 +31,21 @@ func build(in string, e *reportstyle.Style) string {
 	return e.LE
 }
 
+// splitAddr ...
+func splitAddr(addr string) (string, string) {
+	host, port, err := net.SplitHostPort(addr)
+	if err != nil {
+		if addr == "" {
+			return _none, _none
+		}
+		return addr, _none
+	}
+	return host, port
+}
+
 // addCheckPort ...
 func addCheckPort(host string) string {
-	if len(strings.Split(host, _doublepoint)) > 1 {
+	if _, _, err := net.SplitHostPort(host); err == nil {
 		return host
 	}
 	return host + _sslport

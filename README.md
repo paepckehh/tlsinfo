@@ -1,178 +1,159 @@
-# OVERVIEW
+<div align="center">
+
+# tlsinfo
+
+**Analyze TLS connections from the terminal — or from your own Go code.**
+
 [![Go Reference](https://pkg.go.dev/badge/paepcke.de/tlsinfo.svg)](https://pkg.go.dev/paepcke.de/tlsinfo)
-[![Go Report Card](https://goreportcard.com/badge/paepcke.de/tlsinfo)](https://goreportcard.com/report/paepcke.de/tlsinfo) 
-[![Go Build](https://github.com/paepckehh/tlsinfo/actions/workflows/golang.yml/badge.svg)](https://github.com/paepckehh/tlsinfo/actions/workflows/golang.yml)
+[![Go Report Card](https://goreportcard.com/badge/paepcke.de/tlsinfo)](https://goreportcard.com/report/paepcke.de/tlsinfo)
 [![License](https://img.shields.io/github/license/paepckehh/tlsinfo)](https://github.com/paepckehh/tlsinfo/blob/master/LICENSE)
-[![SemVer](https://img.shields.io/github/v/release/paepckehh/tlsinfo)](https://github.com/paepckehh/tlsinfo/releases/latest)
-<br>[![built with nix](https://builtwithnix.org/badge.svg)](https://search.nixos.org/packages?channel=unstable&show=tlsinfo&from=0&size=50&sort=relevance&type=packages&query=tlsinfo) 
+[![Release](https://img.shields.io/github/v/release/paepckehh/tlsinfo)](https://github.com/paepckehh/tlsinfo/releases/latest)
+[![Go Build](https://github.com/paepckehh/tlsinfo/actions/workflows/golang.yml/badge.svg)](https://github.com/paepckehh/tlsinfo/actions/workflows/golang.yml)
+[![Lint](https://github.com/paepckehh/tlsinfo/actions/workflows/golangci-lint.yml/badge.svg)](https://github.com/paepckehh/tlsinfo/actions/workflows/golangci-lint.yml)
+[![built with nix](https://builtwithnix.org/badge.svg)](https://search.nixos.org/packages?channel=unstable&show=tlsinfo&from=0&size=50&sort=relevance&type=packages&query=tlsinfo)
 
 [paepcke.de/tlsinfo](https://paepcke.de/tlsinfo/)
 
--   tired of remembering all the commandline switches of [openssl|certutil] to analyze an tls session, trust cert chains, ...
--   validate, parse and clean export certificate chains, keys, pins, cryptographic states by just entering the hostname
--   get alerts about any anomalies, broken or depricated cryptographic functions
--   100% pure go, minimal(internal-only) imports, use as app or api (see api.go), compatible with certinfo, dnsinfo, ...
+</div>
 
-# ⚡️HOW TO RUN VIA GO
-```
-go run paepcke.de/tlsinfo/cmd/tlsinfo@latest
+---
 
-```
+## Why
 
-# ⚡️HOW TO INSTALL VIA GO
-```
+Tired of remembering all the command-line switches of `openssl s_client` / `certutil` to
+analyze a TLS session or a trust chain? Just enter the hostname.
+
+- Validates, parses and reports certificate chains, keys, pins, cryptographic states
+- Handshake state: TLS version, cipher suite, ALPN, resumption, SCT timestamps
+- OCSP status (stapled responses), with `[SECURITY ALERT]` verdicts on revoked certificates
+- Key pins (SPKI, base64) to build or verify trust-on-first-use pinning
+- Alerts about anomalies, broken or deprecated cryptographic functions
+- 100% pure Go — stdlib + `paepcke.de/certinfo` + `paepcke.de/reportstyle` + `golang.org/x/crypto` only
+- Use as CLI **or** as library ([API](#api)); compatible with `certinfo`, `dnsinfo`, ...
+
+## ⚡️ Quickstart
+
+```shell
+# run via go
+go run paepcke.de/tlsinfo/cmd/tlsinfo@latest github.com
+
+# install via go
 go install paepcke.de/tlsinfo/cmd/tlsinfo@latest
 ```
 
-# ⚡️PRE-BUILD BINARIES (DOWNLOAD)
-[https://github.com/paepckehh/tlsinfo/releases](https://github.com/paepckehh/tlsinfo/releases)
+Prebuilt binaries: [github.com/paepckehh/tlsinfo/releases](https://github.com/paepckehh/tlsinfo/releases)
 
+NixOS:
 
-# ⚡️HOW TO RUN ON NIXOS
-```
+```shell
 nix-shell -p tlsinfo
 ```
 
-# ⚡️HOW TO INSTALL ON NIXOS
-```
-environment.systemPackages = [
-  pkgs.tlsinfo
-];
+```nix
+environment.systemPackages = [ pkgs.tlsinfo ];
 ```
 
-# SHOWTIME 
+## 📖 Usage
 
-## Get a summary of a single host TLS [connection|handshake].
-
-``` Shell
-tlsinfo github.com
-NET Local Address          : 10.159.67.228
-NET Local Port             : 33536
-NET Remote Address         : 20.27.177.113
+```shell
+$ tlsinfo github.com
+NET Local Address          : 10.20.0.99
+NET Local Port             : 39360
+NET Remote Address         : 140.82.121.4
 NET Remote Port            : 443
 TLS Handshake Finished     : true
 TLS Version                : TLS1.3 [0x0304] [OK]
-TLS ALPN                   : 
+TLS ALPN                   :
 TLS Resumed                : false
-TLS Protocol Mutual        : true
 TLS Server Name            : github.com
-TLS Cipher Suite           : TLS_CHACHA20_POLY1305_SHA256
-TLS Uniq ID               
-TLS Signed Timestamps     
+TLS Cipher Suite           : TLS_AES_128_GCM_SHA256
+TLS Uniq ID
+TLS Signed Timestamps
 TLS Verified Cert Chains
-TLS Peer Send Certs     
 
-X509 Cert Subject           : [CN=github.com,O=GitHub\, Inc.,L=San Francisco,ST=California,C=US] 
-X509 Cert Status            : [VALID] [for the next 90 days]
-X509 Cert Signature Algo    : [VALID] [ECDSA-SHA384] 
-X509 Cert Public Key        : [VALID] [ECDSA] [prime256v1] 
-X509 Cert KeyPin [base64]   : [/3ftdeWqIAONye/CeEQuLGvtlw4MPnQmKgyPLugFbK8=] 
-X509 Cert Valid for Host    : [github.com] [www.github.com] 
-X509 Cert Key Usage         : [CRITICAL] [Digital Signature] 
-X509 Cert Key Usage Ext     : [TLS Web server authentication] [TLS Web client authentication] 
-X509 Cert Transparency SCT  : [YES] [RFC6962 SCT] 
-X509 CA Authority           : [NO]
-X509 Issuer Signature By    : [CN=DigiCert TLS Hybrid ECC SHA384 2020 CA1,O=DigiCert Inc,C=US] 
-X509 Issuer Signature State : [FAIL] [x509: certificate signed by unknown authority] 
-X509 Issuer URL             : [http://cacerts.digicert.com/DigiCertTLSHybridECCSHA3842020CA1-1.crt] 
-X509 Issuer OCSP            : [http://ocsp.digicert.com] 
-
-X509 Cert Subject           : [CN=DigiCert TLS Hybrid ECC SHA384 2020 CA1,O=DigiCert Inc,C=US] 
-X509 Cert Status            : [VALID] [for the next 3041 days]
-X509 Cert Signature Algo    : [VALID] [SHA384-RSA] 
-X509 Cert Public Key        : [VALID] [ECDSA] [secp384r1] 
-X509 Cert KeyPin [base64]   : [e0IRz5Tio3GA1Xs4fUVWmH1xHDiH2dMbVtCBSkOIdqM=] 
-X509 Cert Key Usage         : [CRITICAL] [Digital Signature] [Certificate Signing] [CRL Signing] 
-X509 Cert Key Usage Ext     : [TLS Web server authentication] [TLS Web client authentication] 
-X509 CA Authority           : [YES]
-X509 CA Allows SubCAs       : [NO] [PathLen:0]
-X509 Issuer Signature By    : [CN=DigiCert Global Root CA,OU=www.digicert.com,O=DigiCert Inc,C=US] 
-X509 Issuer Signature State : [VALID] [trusted via system trust store]
-X509 Issuer URL             : [http://cacerts.digicert.com/DigiCertGlobalRootCA.crt] 
-X509 Issuer OCSP            : [http://ocsp.digicert.com] 
-[...]
+  X509 Cert Subject          : [CN=github.com]
+  X509 Cert Status           : [VALID] [for the next 49 days]
+  X509 Cert Signature Algo   : [VALID] [ECDSA-SHA256]
+  X509 Cert Public Key       : [VALID] [ECDSA] [prime256v1]
+  X509 Cert KeyPin [base64]  : [/wiL5vgOLgwED41WS0DNF8QiTBVR/P41Kd163tmFxK0=]
+  [...]
 ```
 
-## Same but in ascii only non-color mode for post-processing, logging, ...
+Multiple hosts, or a list piped via stdin — one report per host:
 
-``` Shell
-NO_COLOR=true tlsinfo github.com | grep ... 
-[...]
+```shell
+tlsinfo github.com paepcke.de
+echo github.com | tlsinfo
+cat hosts.txt | tlsinfo
 ```
 
-## Need full details?
+### Environment Variables
 
-``` Shell
-VERBOSE=true tlsinfo github.com 
-[...]
-```
+| Variable  | Effect                                                                   |
+|-----------|--------------------------------------------------------------------------|
+| `NO_COLOR`| plain ASCII output, no ANSI colors (post-processing, logging, ...)       |
+| `VERBOSE` | add raw / PEM / OpenSSL certificate details                              |
+| `HTML`     | HTML output (for web pages, reports, ...)                                |
+| `PINONLY` | print only the base64 SPKI key pin(s) of the host(s)                    |
+| `PEMONLY` | reserved, currently inactive                                            |
 
-## Need only the base64 encoded keypin(s) of a host? 
+### Library
 
-``` Shell
-PINONLY=true tlsinfo github.com 
-[...]
-```
+Full TLS state report of a host:
 
-## Fetch, decode, sanitize, clean re-encode a peers certificate
+```go
+package main
 
-``` Shell
-PEMONLY=true tlsinfo github.com > truststore.pem
-[..]
-```
+import (
+	"os"
 
-# API
-
-## Input Objects to Analyze:
-
--   hostname 
--   net/http/Request
--   crypto/tls/Connection
--   crypto/tls/ConnectionState
--   crypto/ocsp
-
-## Output Format Styles via paepcke.de/reportstyle
-
--   Plain Text
--   Ansi Color Console
--   HTML
--   Custom \[get wild\]
-
-## TLS state report of a single host 
-
-``` Golang 
-package main 
-
-import ( 
-	"os" 
 	"paepcke.de/tlsinfo"
 )
 
-func main() { 
-	os.Stdout.Write([]byte(HostReportAnsi("github.com"))) 
+func main() {
+	os.Stdout.Write([]byte(tlsinfo.ReportHostText("github.com")))
 }
-
 ```
 
-## Get an HTML TLS state report of an client connection within your http handler function
+Report your own clients from inside an HTTP handler:
 
-``` Golang
-[...]
-reportPage := HttpRequestReportHTML(q) // q is normally the server http.Request object within http handler
-[...]
+```go
+// r is the *http.Request within your http handler
+report := tlsinfo.ReportHttpRequestHTML(r)
 ```
 
-# DOCS
+Verify a host key pin (SPKI trust-on-first-use):
+
+```go
+ok := tlsinfo.PinVerifyHost("/wiL5vgOLgwED41WS0DNF8QiTBVR/P41Kd163tmFxK0=", "github.com")
+```
+
+### API
+
+| Function                                     | Input                                    |
+|----------------------------------------------|-------------------------------------------|
+| `ReportHostText` / `ReportHostHTML` / `ReportHost` | hostname (+ `tls.Config`, `*reportstyle.Style`) |
+| `ReportConnText` / `ReportConnHTML` / `ReportConn` | established `*tls.Conn`                |
+| `ReportTlsStateText` / `ReportTlsStateHTML` / `ReportTlsState` | `*tls.ConnectionState`       |
+| `ReportHttpRequestText` / `ReportHttpRequestHTML` / `ReportHttpRequest` | server-side `*http.Request` |
+| `ReportOcsp`                                 | `*tls.Conn` + issuer `*x509.Certificate`  |
+| `PinHost`, `PinHostWithTLS`                  | hostname (+ `tls.Config`)                 |
+| `PinVerifyHost`, `PinVerifyHostWithTLS`      | key pin + hostname                        |
+| `PinVerifyConn`, `PinVerifyState`            | key pin + `*tls.Conn` / `*tls.ConnectionState` |
+
+Output format styles (via [`paepcke.de/reportstyle`](https://pkg.go.dev/paepcke.de/reportstyle)):
+plain text, ANSI color console, HTML, raw, or fully custom.
+
+## 📚 Documentation
 
 [pkg.go.dev/paepcke.de/tlsinfo](https://pkg.go.dev/paepcke.de/tlsinfo)
 
-# 🛡 License
+## 🛡 License
 
-[![License](https://img.shields.io/github/license/paepckehh/tlsinfo)](https://github.com/paepckehh/tlsinfo/blob/master/LICENSE)
+This project is licensed under the terms of the `BSD 3-Clause License`.
+See [LICENSE](https://github.com/paepckehh/tlsinfo/blob/master/LICENSE) for details.
 
-This project is licensed under the terms of the `BSD 3-Clause License` license. See [LICENSE](https://github.com/paepckehh/tlsinfo/blob/master/LICENSE) for more details.
-
-# 📃 Citation
+## 📃 Citation
 
 ```bibtex
 @misc{tlsinfo,
@@ -185,6 +166,6 @@ This project is licensed under the terms of the `BSD 3-Clause License` license. 
 }
 ```
 
-# CONTRIBUTION
+## 🤝 Contribution
 
-Yes, Please! PRs Welcome! 
+Yes, please! PRs welcome! See [CONTRIBUTING.md](CONTRIBUTING.md).
