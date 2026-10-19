@@ -245,8 +245,8 @@ func TestReportOcsp(t *testing.T) {
 	if got := ReportOcsp(conn, ca); got != "Good [OK]" {
 		t.Errorf("ReportOcsp(conn, issuer) = %q, want %q", got, "Good [OK]")
 	}
-	if got := ReportOcsp(conn, leaf); got == "Good [OK]" {
-		t.Errorf("ReportOcsp(conn, leaf) must fail the issuer signature check, got %q", got)
+	if got := ReportOcsp(conn, leaf); got == "Good [OK]" || !strings.Contains(got, "[error]") {
+		t.Errorf("ReportOcsp(conn, leaf) must embed a tagged error after the issuer signature check fails, got %q", got)
 	}
 	if got := ReportOcsp(conn, nil); got == "" || got == "Good [OK]" {
 		t.Errorf("ReportOcsp(conn, nil) must return the raw hex response, got %q", got)

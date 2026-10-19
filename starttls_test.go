@@ -50,6 +50,24 @@ func TestAddStarttlsPort(t *testing.T) {
 	})
 }
 
+// TestReadLine ...
+func TestReadLine(t *testing.T) {
+	t.Parallel()
+	client, server := net.Pipe()
+	t.Cleanup(func() {
+		_ = client.Close()
+		_ = server.Close()
+	})
+	go func() {
+		_, _ = io.WriteString(server, "+OK ready") // final line without newline, then close
+		_ = server.Close()
+	}()
+	line, err := readLine(bufio.NewReader(client))
+	if err != nil || line != "+OK ready" {
+		t.Errorf("readLine() = (%q, %v), want (%q, nil)", line, err, "+OK ready")
+	}
+}
+
 // TestStarttlsUpgrade ...
 func TestStarttlsUpgrade(t *testing.T) {
 	t.Parallel()

@@ -151,8 +151,8 @@ func ReportConn(conn *tls.Conn, e *reportstyle.Style) string {
 func ReportHttpRequest(q *http.Request, e *reportstyle.Style) string {
 	remoteHost, remotePort := splitAddr(q.RemoteAddr)
 	var s strings.Builder
-	s.WriteString(e.L1 + "NET Remote address        " + e.L2 + remoteHost + e.LE)
-	s.WriteString(e.L1 + "NET Remote port           " + e.L2 + remotePort + e.LE)
+	s.WriteString(e.L1 + "NET Remote Address        " + e.L2 + remoteHost + e.LE)
+	s.WriteString(e.L1 + "NET Remote Port           " + e.L2 + remotePort + e.LE)
 	s.WriteString(e.L1 + "HTTP Protocol             " + e.L2 + q.Proto + e.LE)
 	s.WriteString(e.L1 + "HTTP Transfer Encoding    " + e.L2 + strings.Join(q.TransferEncoding, _space) + e.LE)
 	s.WriteString(ReportTlsState(q.TLS, e))
@@ -183,7 +183,7 @@ func ReportTlsState(state *tls.ConnectionState, e *reportstyle.Style) string {
 	s.WriteString(e.L1 + "TLS Uniq ID               " + build(hex.EncodeToString(state.TLSUnique), e))
 	s.WriteString(e.L1 + "TLS Signed Timestamps     " + build(ts, e))
 	s.WriteString(e.L1 + "TLS Verified Cert Chains\n" + build(certinfo.CertStores(state.VerifiedChains, certReport), e))
-	s.WriteString(e.L1 + "TLS Peer Send Certs     \n" + build(certinfo.CertStore(state.PeerCertificates, certReport), e))
+	s.WriteString(e.L1 + "TLS Peer Send Certs\n" + build(certinfo.CertStore(state.PeerCertificates, certReport), e))
 	return s.String()
 }
 
@@ -193,7 +193,7 @@ func ReportOcsp(conn *tls.Conn, issuerCert *x509.Certificate) string {
 	if len(ocspResponse) > 8 && issuerCert != nil {
 		r, err := ocsp.ParseResponse(ocspResponse, issuerCert)
 		if err != nil {
-			return err.Error()
+			return "[tlsinfo] [error] [ocsp] " + err.Error()
 		}
 		// @UPSTREAM golang.org/x/crypto/ocsp: Response.Status is plain int {Good=0|Revoked=1|Unknown=2}, NOT type ResponseStatus (success/malformed/...)
 		switch r.Status {

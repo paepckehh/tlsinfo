@@ -4,6 +4,7 @@ import (
 	"bufio"
 	"crypto/tls"
 	"fmt"
+	"io"
 	"net"
 	"strings"
 	"time"
@@ -93,6 +94,7 @@ func starttlsDial(proto, host string, t *tls.Config) (*tls.Conn, error) {
 		_ = conn.Close()
 		return nil, err
 	}
+	_ = conn.SetDeadline(time.Time{}) // handshake done, drop the 30s cap so later I/O is not time-bombed
 	return conn, nil
 }
 
@@ -138,5 +140,8 @@ func reply(r *bufio.Reader, conn net.Conn, send, want string) error {
 // readLine ...
 func readLine(r *bufio.Reader) (string, error) {
 	line, err := r.ReadString(_linefeed[0])
-	return strings.TrimRight(line, _crlf), err
+	if err != nil && (err != io.EOF || line == "") { // accept a final line that lacks its newline
+		return "", err
+	}
+	return strings.TrimRight(line, _crlf), nil
 }
