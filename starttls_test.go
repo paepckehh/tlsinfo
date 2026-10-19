@@ -188,6 +188,9 @@ func TestReportStartTLS(t *testing.T) {
 			t.Errorf("ReportStartTLS() output missing %q", sub)
 		}
 	}
+	if out := ReportStartTLS(addr, "SMTP", &tls.Config{}, reportstyle.StyleText()); strings.Contains(out, "[error]") { // protocol identifiers are case-insensitive
+		t.Errorf("ReportStartTLS(SMTP uppercase) = %q, want a finished handshake", out)
+	}
 	pin := certinfo.KeyPinBase64(leaf)
 	if got := PinStartTLS(addr, SMTP, &tls.Config{}); got != pin {
 		t.Errorf("PinStartTLS() = %q, want %q", got, pin)

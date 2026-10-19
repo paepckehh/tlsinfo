@@ -16,7 +16,7 @@ Repo: https://github.com/paepckehh/tlsinfo | Docs: https://pkg.go.dev/paepcke.de
 - `api.go` — public library API + generic backend (the core)
 - `generic.go` — unexported helpers (consts, version table, splitAddr, addPort, dial timeout)
 - `starttls.go` — STARTTLS backend: protocol table (`_starttlsProtocols`), upgrade dialer
-- `cmd/tlsinfo/` — CLI main (thin wrapper, env-vars-only config)
+- `cmd/tlsinfo/` — CLI main (thin wrapper, POSIX flags via stdlib `flag`)
 
 ## API quick map
 
@@ -28,7 +28,8 @@ Repo: https://github.com/paepckehh/tlsinfo | Docs: https://pkg.go.dev/paepcke.de
 
 ## Conventions
 
-- CLI config via env vars only: `NO_COLOR`, `VERBOSE`, `HTML`, `PINONLY`, `STARTTLS` (empty value = off)
+- CLI: POSIX flags (`-starttls`, `-pin`, `-verbose`, `-html`, `-no-color`, `-version`); env vars `NO_COLOR`, `VERBOSE`, `HTML`, `PINONLY`, `STARTTLS` act as fallback defaults (empty = off)
+- CLI exit codes: 0 ok, 1 host check failed, 2 usage error; version injected at build time via `-ldflags "-X main._version=<git tag>"` (shown at startup, in `-h`, and via `-version`)
 - Errors embedded in returned strings: `[tlsinfo]` / `[starttls]` `[error] ...`
 - STARTTLS protocols: `smtp`, `imap`, `pop3`, `nntp`, `ftp`
 - go 1.27, CGO disabled, gofmt -s; `v*` tag pushes cut goreleaser releases

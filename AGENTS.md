@@ -9,7 +9,9 @@ Guide for AI agents (and humans) working in this repository.
 ## Commands
 
 ```sh
-make all          # run the CLI against github.com (live network call!)
+make all          # build (with version ldflags) and run the CLI against github.com (live network!)
+make build        # CGO_ENABLED=0 go build with -X main._version=<git tag> into ./tlsinfo
+make version      # print the semver tracked from the latest git tag
 make examples     # run CLI against github.com and paepcke.de (live network)
 make test         # go test ./... (offline, loopback-only TLS test server)
 make check        # gofmt -w -s, go vet, go fix, golangci-lint (root + cmd/)
@@ -38,10 +40,10 @@ llms.txt           AI-friendly repo overview (LLM entrypoint, keep in sync)
 Three-layer API in `api.go`, top-down:
 
 1. **Simple API** — style-fixed wrappers: `ReportHostText/HTML`, `ReportStartTLSText/HTML`, `PinHost`, `PinVerifyHost`, `PinStartTLS`, `PinVerifyStartTLS`, ...
-2. **Generic backend** — `ReportHost(host, *tls.Config, *reportstyle.Style)` → `ReportConn` → `ReportTlsState` (pure, works from `tls.ConnectionState`). STARTTLS via `starttlsDial` (plaintext `net.Dial` → protocol negotiation → `tls.Client` handshake). OCSP via `ReportOcsp`.
+2. **Generic backend** — `ReportHost(host, *tls.Config, *reportstyle.Style)` → `ReportConn` → `ReportTlsState` (pure, works from `tls.ConnectionState`). STARTTLS via `starttlsDial` (plaintext `net.DialTimeout` → protocol negotiation → `tls.Client` handshake). OCSP via `ReportOcsp`.
 3. **External** — `certinfo.CertStore(s)` renders certificate details, `reportstyle.Style` (L1/L2/L3/LE/Raw) renders lines.
 
-Data flow: hostname → `addCheckPort`/`addStarttlsPort` (append default port, bracket bare IPv6 literals) → `tls.Dial` (or `net.Dial` + STARTTLS negotiation + `tls.Client`) → `tls.Conn` → `ConnectionState` → assembled report string. `ReportHttpRequest` is the server-side variant (report your own clients from an HTTP handler).
+Data flow: hostname → `addCheckPort`/`addStarttlsPort` (append default port, bracket bare IPv6 literals) → `tls.Dial` (or `net.DialTimeout` + STARTTLS negotiation + `tls.Client`) → `tls.Conn` → `ConnectionState` → assembled report string. `ReportHttpRequest` is the server-side variant (report your own clients from an HTTP handler).
 
 ## Conventions (observed, not documented anywhere else)
 
@@ -49,12 +51,14 @@ Data flow: hostname → `addCheckPort`/`addStarttlsPort` (append default port, b
 - **Section banners**: `//` blank, `// SECTION NAME`, `//` between API groups.
 - **Unexported constants are underscore-prefixed**: `_tcp`, `_sslport`, `_app`.
 - **Errors are embedded in return strings** (`"[tlsinfo] [error] ..."` / `"[starttls] [error] ..."` — the leading tag names the failing component), not `(string, error)` tuples. Library API returns plain strings; keep that shape.
-- **CLI config is env-vars only, no flags**: `NO_COLOR`, `VERBOSE` (enables raw/PEM/OpenSSL detail), `HTML`, `PINONLY`, `STARTTLS` (protocol identifier: `smtp`, `imap`, `pop3`, `nntp`, `ftp` — also combines with `PINONLY`), `PEMONLY` (**currently a no-op** — `PemHost` call is commented out in `cmd/tlsinfo/main.go`). Env vars are only "on" when set to a **non-empty** value (`isEnv`, per no-color.org: `NO_COLOR=""` keeps colors).
-- **Piped stdin beats argv** in the CLI: check `isPipe()` branch order in `main.go` before changing input handling. Pipe input is whitespace-split via `pipeHosts()` (trims trailing newlines, supports multi-host pipes); `PINONLY`/`PEMONLY`/`STARTTLS` apply to both input paths via the `report()` helper.
+- **CLI is stdlib-`flag` POSIX style, no external CLI library** (zero-dependency philosophy, single-purpose tool): `-starttls <proto>`, `-pin`, `-verbose`, `-html`, `-no-color`, `-version`. Env vars `STARTTLS` (protocol identifier: `smtp`, `imap`, `pop3`, `nntp`, `ftp` — combines with `-pin`), `PINONLY`, `VERBOSE` (raw/PEM/OpenSSL detail), `HTML`, `NO_COLOR` are kept as **fallback flag defaults** for backward compat; a flag always beats the env var. Env vars are only "on" when set to a **non-empty** value (`isEnv`, per no-color.org: `NO_COLOR=""` keeps colors). The dead `PEMONLY` no-op branch was removed — add a `-pem` flag only together with a real `PemHost` library function.
+- **CLI exit codes**: `0` all host checks succeeded, `1` at least one report contains `[error]` (unreachable/failed handshake), `2` usage error (flag package `ExitOnError` or no host and no piped stdin).
+- **Version**: `var _version = "dev"` in `cmd/tlsinfo/main.go`, injected at build time via `-ldflags "-X main._version=<git tag>"` (root `make build`, `cmd/tlsinfo` Makefile `LDFLAGS`, and `.goreleaser.yml` `{{ .Tag }}` — keep all three in sync with the tag). Shown on stderr at startup, in `-h` usage header, and via `-version` (stdout).
+- **Piped stdin beats argv** in the CLI: check `isPipe()` branch order in `main.go` before changing input handling. Pipe input is whitespace-split via `pipeHosts()` (trims trailing newlines, supports multi-host pipes); all flags apply to both input paths via the `report()` helper.
 - `gofmt -s` (simplify) formatting; CGO disabled in Makefile, CI, and `.goreleaser.yml`.
 - **`.goreleaser.yml` is a goreleaser v2 config** (`version: 2`): `go mod tidy` pre-hook, `-s -w` ldflags strip, CGO_ENABLED=0, GitHub changelog (`use: github`) grouped by conventional-commit type (`feat` → Features, `fix` → Bug fixes, `perf|refactor|improve` → Improvements, `docs` → Documentation, `ci|build|chore` → CI & Build, rest → Others; `docs:`/`test:`/`chore:` commits excluded), plus deb/rpm `nfpms` packages. `.github/workflows/release.yml` pins checkout/setup-go/goreleaser-action@v7 and goreleaser v2.18.2, triggers on `v*` tag push (or manual dispatch), needs `contents: write` — keep it in sync with `../opnborg`, the working reference.
 - Dependency bumps arrive via Dependabot PRs, commit style `build(deps): bump <module> from X to Y`.
-- **STARTTLS backend lives in `starttls.go`**: exported protocol identifiers (`SMTP`, `IMAP`, `POP3`, `NNTP`, `FTP`) map to **one** table `_starttlsProtocols` (rows are `starttlsDef{port, sequence}`: default plaintext port + negotiation steps of command + expected response prefix). The unsupported-protocol error comes from the shared helper `starttlsUnsupported`. `starttlsDial` sets `InsecureSkipVerify` + infers `ServerName` (like `tls.Dial`), puts a 30s deadline on the plaintext phase (`_dialWait`).
+- **STARTTLS backend lives in `starttls.go`**: exported protocol identifiers (`SMTP`, `IMAP`, `POP3`, `NNTP`, `FTP`) map to **one** table `_starttlsProtocols` (rows are `starttlsDef{port, sequence}`: default plaintext port + negotiation steps of command + expected response prefix). The unsupported-protocol error comes from the shared helper `starttlsUnsupported`. `starttlsDial` lowercases the protocol identifier, sets `InsecureSkipVerify` + infers `ServerName` (like `tls.Dial`), dials with `net.DialTimeout` (30s `_dialWait` cap — a bare `net.Dial` hangs for minutes on firewalled/dropped SYN ports), and re-arms a fresh 30s deadline before the TLS handshake so negotiation and handshake each get their own window.
 
 ## Gotchas
 

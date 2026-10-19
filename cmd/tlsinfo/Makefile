@@ -1,7 +1,16 @@
-all:
-	go run main.go github.com
+VERSION=$(shell git describe --tags --abbrev=0 2>/dev/null || echo dev)
+LDFLAGS=-s -w -X main._version=$(VERSION)
 
-check: 
+all: build
+	./tlsinfo github.com
+
+build:
+	CGO_ENABLED=0 go build -ldflags "$(LDFLAGS)" -o tlsinfo .
+
+version:
+	@echo $(VERSION)
+
+check:
 	gofmt -w -s .
 	CGO_ENABLED=0 go vet .
 	CGO_ENABLED=0 go fix -diff .
@@ -9,6 +18,6 @@ check:
 	CGO_ENABLED=0 golangci-lint run
 	# CGO_ENABLED=0 staticcheck
 
-examples:
-	go run main.go github.com
-	go run main.go paepcke.de
+examples: build
+	./tlsinfo github.com
+	./tlsinfo paepcke.de

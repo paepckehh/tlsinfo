@@ -1,5 +1,6 @@
 /tlsinfo
 /tlsinfo.exe
+cmd/tlsinfo/tlsinfo
 /.crushrc
 /.attic
 /.crush

@@ -58,6 +58,7 @@ func starttlsUnsupported(proto string) error {
 
 // starttlsDial ...
 func starttlsDial(proto, host string, t *tls.Config) (*tls.Conn, error) {
+	proto = strings.ToLower(proto)
 	if t == nil {
 		t = &tls.Config{}
 	}
@@ -66,7 +67,7 @@ func starttlsDial(proto, host string, t *tls.Config) (*tls.Conn, error) {
 	if err != nil {
 		return nil, err
 	}
-	raw, err := net.Dial(_tcp, addr)
+	raw, err := net.DialTimeout(_tcp, addr, _dialWait)
 	if err != nil {
 		return nil, err
 	}
@@ -82,6 +83,10 @@ func starttlsDial(proto, host string, t *tls.Config) (*tls.Conn, error) {
 		if serverName, _, err := net.SplitHostPort(addr); err == nil {
 			t.ServerName = serverName
 		}
+	}
+	if err := raw.SetDeadline(time.Now().Add(_dialWait)); err != nil { // fresh window for the TLS handshake itself
+		_ = raw.Close()
+		return nil, err
 	}
 	conn := tls.Client(raw, t)
 	if err := conn.Handshake(); err != nil {

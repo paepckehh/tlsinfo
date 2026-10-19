@@ -110,37 +110,42 @@ echo github.com | tlsinfo
 cat hosts.txt | tlsinfo
 ```
 
+### Command line flags
+
+The CLI follows usual POSIX conventions (`tlsinfo -h` prints usage with the
+version). Every flag has an equivalent environment variable as fallback, so
+existing scripts keep working (empty value = off, see [no-color.org](https://no-color.org)):
+
+| Flag           | Environment variable | Effect                                                        |
+|----------------|----------------------|---------------------------------------------------------------|
+| `-starttls p`  | `STARTTLS`           | negotiate STARTTLS before the handshake: `smtp`, `imap`, `pop3`, `nntp`, `ftp` |
+| `-pin`         | `PINONLY`            | print only the base64 SPKI key pin(s) of the host(s)           |
+| `-verbose`     | `VERBOSE`            | add raw / PEM / OpenSSL certificate details                    |
+| `-html`        | `HTML`               | HTML output (for web pages, reports, ...)                      |
+| `-no-color`    | `NO_COLOR`           | plain ASCII output, no ANSI colors (post-processing, ...)      |
+| `-version`     | —                    | print the version (injected from the git tag at build time) and exit |
+
+Exit codes: `0` all checks succeeded, `1` at least one host failed
+(unreachable, failed handshake, ...), `2` usage error.
+
 ### STARTTLS
 
 Analyze mail or news servers that speak TLS only after an in-band upgrade:
 
 ```shell
-STARTTLS=smtp tlsinfo smtp.gmail.com:587
-STARTTLS=imap tlsinfo mail.example.com
+tlsinfo -starttls smtp smtp.gmail.com:587
+tlsinfo -starttls imap mail.example.com
 ```
 
 ### Key pins
 
 ```shell
 # fetch the base64 SPKI key pin of a host (TOFU first use)
-PINONLY=1 tlsinfo github.com
+tlsinfo -pin github.com
 
 # works via STARTTLS too
-PINONLY=1 STARTTLS=smtp tlsinfo smtp.gmail.com:587
+tlsinfo -pin -starttls smtp smtp.gmail.com:587
 ```
-
-### Environment variables
-
-The CLI is configured entirely via environment variables (empty value = off, see [no-color.org](https://no-color.org)):
-
-| Variable  | Effect                                                                       |
-|-----------|------------------------------------------------------------------------------|
-| `NO_COLOR` | plain ASCII output, no ANSI colors (post-processing, logging, ...)          |
-| `VERBOSE`  | add raw / PEM / OpenSSL certificate details                                  |
-| `HTML`     | HTML output (for web pages, reports, ...)                                    |
-| `PINONLY`  | print only the base64 SPKI key pin(s) of the host(s)                          |
-| `PEMONLY`  | reserved, currently inactive                                                 |
-| `STARTTLS` | test STARTTLS instead of implicit TLS: `smtp`, `imap`, `pop3`, `nntp`, `ftp` |
 
 ## Library
 

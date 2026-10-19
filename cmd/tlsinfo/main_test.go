@@ -5,6 +5,8 @@ import (
 	"path/filepath"
 	"reflect"
 	"testing"
+
+	"paepcke.de/reportstyle"
 )
 
 // TestIsEnv ...
@@ -19,6 +21,20 @@ func TestIsEnv(t *testing.T) {
 	t.Setenv("TLSINFO_TEST_EMPTY", "")
 	if isEnv("TLSINFO_TEST_EMPTY") {
 		t.Error("isEnv() = true, want false for empty environment variable")
+	}
+}
+
+// TestReportErrorDetection ...
+func TestReportErrorDetection(t *testing.T) {
+	if !report("host.invalid", "", false, reportstyle.StyleText()) {
+		t.Error("report() = false for unresolvable host, want true to signal a failed check")
+	}
+}
+
+// TestVersionDefault ...
+func TestVersionDefault(t *testing.T) {
+	if _version == "" {
+		t.Error("_version must never be empty, falls back to dev when not injected at build time")
 	}
 }
 

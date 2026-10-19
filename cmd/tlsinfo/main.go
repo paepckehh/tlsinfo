@@ -4,6 +4,8 @@ package main
 // import
 import (
 	"crypto/tls"
+	"flag"
+	"fmt"
 	"io"
 	"log"
 	"os"
@@ -19,35 +21,56 @@ const (
 	_err      = "[error] "
 	_html     = "HTML"
 	_noColor  = "NO_COLOR"
-	_pemonly  = "PEMONLY"
 	_pinonly  = "PINONLY"
 	_starttls = "STARTTLS"
 	_verbose  = "VERBOSE"
 )
 
+// _version tracks the release tag, injected at build time via
+// -ldflags "-X main._version=v0.X.Y" (see Makefile and .goreleaser.yml)
+var _version = "dev"
+
 // main ...
 func main() {
+	flag.Usage = usage
+	proto := flag.String("starttls", os.Getenv(_starttls), "negotiate STARTTLS before the TLS handshake: smtp, imap, pop3, nntp, ftp (env "+_starttls+")")
+	pin := flag.Bool("pin", isEnv(_pinonly), "key pin output only (env "+_pinonly+")")
+	html := flag.Bool("html", isEnv(_html), "HTML output (env "+_html+")")
+	noColor := flag.Bool("no-color", isEnv(_noColor), "plain text output (env "+_noColor+")")
+	verbose := flag.Bool("verbose", isEnv(_verbose), "raw PEM and OpenSSL certificate detail (env "+_verbose+")")
+	showVersion := flag.Bool("version", false, "print version and exit")
+	flag.Parse()
+	if *showVersion {
+		fmt.Println(_version)
+		return
+	}
+	fmt.Fprintf(os.Stderr, "tlsinfo %s\n", _version)
 	style := reportstyle.StyleAnsi()
-	if isEnv(_noColor) {
+	switch {
+	case *html:
+		style = reportstyle.StyleHTML()
+	case *noColor:
 		style = reportstyle.StyleText()
 	}
-	if isEnv(_html) {
-		style = reportstyle.StyleHTML()
-	}
-	if isEnv(_verbose) {
+	if *verbose {
 		style.Raw = true
 	}
+	var failed bool
 	switch {
 	case isPipe():
 		for _, host := range pipeHosts() {
-			report(host, style)
+			failed = report(host, *proto, *pin, style) || failed
 		}
-	case isOsArgs():
-		for _, host := range os.Args[1:] {
-			report(host, style)
+	case len(flag.Args()) > 0:
+		for _, host := range flag.Args() {
+			failed = report(host, *proto, *pin, style) || failed
 		}
 	default:
-		log.Fatal(_app + _err + "no pipe or input parameter found, example: tlsinfo github.com")
+		usage()
+		os.Exit(2)
+	}
+	if failed {
+		os.Exit(1)
 	}
 }
 
@@ -55,23 +78,28 @@ func main() {
 // LITTLE GENERIC HELPER SECTION
 //
 
+// usage ...
+func usage() {
+	fmt.Fprintf(os.Stderr, "tlsinfo %s - report TLS connection and certificate details\n\n", _version)
+	fmt.Fprintf(os.Stderr, "usage: tlsinfo [flags] host [host...]\n       hosts are read from stdin when piped\n\nflags:\n")
+	flag.PrintDefaults()
+}
+
 // report ...
-func report(host string, style *reportstyle.Style) {
-	proto := os.Getenv(_starttls)
+func report(host, proto string, pin bool, style *reportstyle.Style) bool {
+	var msg string
 	switch {
-	case isEnv(_pinonly):
-		if proto != "" {
-			out(tlsinfo.PinStartTLS(host, proto, &tls.Config{}))
-			return
-		}
-		out(tlsinfo.PinHost(host))
-	case isEnv(_pemonly):
-		// out(tlsinfo.PemHost(host))
+	case pin && proto != "":
+		msg = tlsinfo.PinStartTLS(host, proto, &tls.Config{})
+	case pin:
+		msg = tlsinfo.PinHost(host)
 	case proto != "":
-		out(tlsinfo.ReportStartTLS(host, proto, &tls.Config{}, style))
+		msg = tlsinfo.ReportStartTLS(host, proto, &tls.Config{}, style)
 	default:
-		out(tlsinfo.ReportHost(host, &tls.Config{}, style))
+		msg = tlsinfo.ReportHost(host, &tls.Config{}, style)
 	}
+	out(msg)
+	return strings.Contains(msg, _err)
 }
 
 // out ...
@@ -102,11 +130,6 @@ func getPipe() string {
 		log.Fatal(_app + _err + "reading data from pipe")
 	}
 	return string(pipe)
-}
-
-// isOsArgs ...
-func isOsArgs() bool {
-	return len(os.Args) > 1
 }
 
 // isEnv ...

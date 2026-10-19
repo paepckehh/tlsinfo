@@ -1,7 +1,14 @@
 PROJECT=$(shell basename $(CURDIR))
+VERSION=$(shell git describe --tags --abbrev=0 2>/dev/null || echo dev)
 
 all:
 	make -C cmd/$(PROJECT) all
+
+build:
+	CGO_ENABLED=0 go build -ldflags "-s -w -X main._version=$(VERSION)" -o tlsinfo ./cmd/$(PROJECT)
+
+version:
+	@echo $(VERSION)
 
 examples:
 	make -C cmd/$(PROJECT) examples
