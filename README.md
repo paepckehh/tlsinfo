@@ -2,10 +2,12 @@
 
 # 🔐 tlsinfo
 
-**TLS analysis in one command — or one function call.**
+**Know exactly what's on the wire.**
 
-Handshake state, certificate chains, key pins, OCSP status and crypto hygiene for any host.
-A tiny CLI **and** a pure Go library. No flags, no config files, no bloat.
+One static binary that talks TLS to anything (web, mail, news, FTP) and tells you what the
+handshake, the certificate chain, the key pins and the OCSP staple *actually* look like.
+
+No config files. No daemon. No dependency tree.
 
 [![Go Reference](https://pkg.go.dev/badge/paepcke.de/tlsinfo.svg)](https://pkg.go.dev/paepcke.de/tlsinfo)
 [![Go Report Card](https://goreportcard.com/badge/paepcke.de/tlsinfo)](https://goreportcard.com/report/paepcke.de/tlsinfo)
@@ -28,55 +30,57 @@ A tiny CLI **and** a pure Go library. No flags, no config files, no bloat.
 
 ---
 
+> **TL;DR**
+>
+> ```shell
+> go install paepcke.de/tlsinfo/cmd/tlsinfo@latest
+> tlsinfo github.com
+> ```
+>
+> One command. One report. Every TLS fact you were about to dig out of `openssl s_client`.
+
 ## Contents
 
-- [Features](#features)
-- [Quickstart](#quickstart)
+- [Why tlsinfo](#why-tlsinfo)
+- [See it in action](#see-it-in-action)
+- [Install](#install)
 - [Usage](#usage)
 - [Library](#library)
+- [How it works](#how-it-works)
+- [Design promises](#design-promises)
 - [Documentation](#documentation)
 - [Contributing](#contributing)
 - [License](#license)
+- [Citation](#citation)
 
-## Features
+## Why tlsinfo
 
-- 📄 **Full chain analysis** — validates, parses and reports certificate chains, keys, pins and cryptographic states
-- 🤝 **Handshake state** — TLS version, cipher suite, ALPN, resumption, SCT timestamps, with instant `[SECURITY ALERT]` / `[OK]` verdicts
-- 🚀 **STARTTLS testing** — upgrade plaintext connections and analyze the TLS layer (SMTP, IMAP, POP3, NNTP, FTP)
-- 📌 **Key pins** — SPKI base64 pins to build or verify trust-on-first-use (TOFU) pinning, even on untrusted or self-signed chains
-- 🛡️ **OCSP status** — stapled responses verified against the issuer, bound to the presented leaf certificate (a staple for another certificate is rejected), with stale/expired responses flagged `[WARNING]`; revoked certificates flagged as `[SECURITY ALERT]`
-- 🧪 **Works everywhere** — 100% pure Go: stdlib + `paepcke.de/certinfo` + `paepcke.de/reportstyle` + `golang.org/x/crypto`, nothing else
-- 🎨 **Output your way** — ANSI console, plain ASCII, HTML, raw/PEM/OpenSSL detail, or fully custom styles
-- 🔌 **CLI *or* library** — same core, [library API](#library), compatible with `certinfo`, `dnsinfo`, ...
+TLS is invisible until it isn't. Then you are three terminals deep in `openssl s_client`,
+`openssl x509`, a calendar, a pinning spreadsheet and a browser devtools panel, trying to
+answer one question: **is this connection what I think it is?**
 
-## Quickstart
+`tlsinfo` answers it in one shot, for the CLI and for your Go code, using the same engine:
 
-```shell
-# try it instantly
-go run paepcke.de/tlsinfo/cmd/tlsinfo@latest github.com
+- 🧭 **Handshake truth, no interpretation** - TLS version, cipher suite, ALPN, resumption,
+  SCT timestamps and the TLS unique ID. Version labels carry instant `[OK]` /
+  `[LEGACY FALLBACK]` / `[SECURITY ALERT]` verdicts.
+- 📄 **Every certificate, parsed** - subject, validity window, signature algorithm, public
+  key, SANs, chain layout and the SPKI key pin, without a single OpenSSL invocation.
+- 🛡️ **OCSP that means something** - the stapled response is verified against the issuer
+  *and bound to the presented leaf*. A valid staple for a different certificate is rejected.
+  Stale staples get `[WARNING]`, revoked certificates get `[SECURITY ALERT]`.
+- 📌 **Pins built for real use** - SPKI base64 pins for trust-on-first-use, even on
+  untrusted or self-signed chains, with verification helpers ready for production.
+- 🚀 **STARTTLS included** - SMTP, IMAP, POP3, NNTP and FTP upgrades, so the mail and news
+  servers nobody remembers to check are one flag away.
+- 🎨 **Output for humans and machines** - ANSI color, plain ASCII, HTML (injection-safe),
+  or fully custom styles via `reportstyle`, plus raw PEM/OpenSSL detail on demand.
+- 🧪 **Zero surprise dependencies** - pure Go, CGO off. Direct imports: the standard library
+  plus [`certinfo`](https://pkg.go.dev/paepcke.de/certinfo),
+  [`reportstyle`](https://pkg.go.dev/paepcke.de/reportstyle) and
+  [`x/crypto`](https://pkg.go.dev/golang.org/x/crypto). Nothing heavier sneaks in.
 
-# install it
-go install paepcke.de/tlsinfo/cmd/tlsinfo@latest
-```
-
-<details>
-<summary>Other install options</summary>
-
-Prebuilt binaries for every platform: [releases](https://github.com/paepckehh/tlsinfo/releases/latest)
-
-NixOS:
-
-```shell
-nix-shell -p tlsinfo
-```
-
-```nix
-environment.systemPackages = [ pkgs.tlsinfo ];
-```
-
-</details>
-
-## Usage
+## See it in action
 
 ```console
 $ tlsinfo github.com
@@ -102,7 +106,7 @@ TLS Verified Cert Chains
   [...]
 ```
 
-One report per host — pass multiple hosts, or pipe a list via stdin:
+One report per host. Pass several, or pipe a list:
 
 ```shell
 tlsinfo github.com paepcke.de
@@ -110,52 +114,105 @@ echo github.com | tlsinfo
 cat hosts.txt | tlsinfo
 ```
 
-Flags must precede the host list (`tlsinfo -pin github.com`, not
-`tlsinfo github.com -pin`), following POSIX conventions. Piped hosts take
-precedence; if the input stream carries no hosts, the command line hosts are
-used.
+Want just the pin? `tlsinfo -pin github.com`.
+
+Want the mail server behind port 587? `tlsinfo -starttls smtp smtp.gmail.com:587`.
+
+Want HTML for a dashboard? `tlsinfo -html github.com | your-renderer`.
+
+## Install
+
+```shell
+# run it right now
+go run paepcke.de/tlsinfo/cmd/tlsinfo@latest github.com
+
+# install it
+go install paepcke.de/tlsinfo/cmd/tlsinfo@latest
+```
+
+<details>
+<summary><strong>Other install options</strong></summary>
+
+Prebuilt binaries for Linux, macOS, Windows and the BSDs (amd64/arm64):
+[github.com/paepckehh/tlsinfo/releases](https://github.com/paepckehh/tlsinfo/releases/latest).
+`.deb` and `.rpm` packages are published with every release.
+
+NixOS / Nix:
+
+```shell
+nix-shell -p tlsinfo
+```
+
+```nix
+environment.systemPackages = [ pkgs.tlsinfo ];
+```
+
+Build from source:
+
+```shell
+git clone https://github.com/paepckehh/tlsinfo
+cd tlsinfo
+make build
+./tlsinfo github.com
+```
+
+</details>
+
+## Usage
 
 ### Command line flags
 
-The CLI follows usual POSIX conventions (`tlsinfo -h` prints usage with the
-version). Every flag has an equivalent environment variable as fallback, so
-existing scripts keep working (empty value = off, see [no-color.org](https://no-color.org)):
+POSIX conventions, stdlib `flag`, `tlsinfo -h` prints usage with the version.
+Every flag has an environment variable fallback for existing scripts
+(empty value = off, see [no-color.org](https://no-color.org)):
 
-| Flag           | Environment variable | Effect                                                        |
-|----------------|----------------------|---------------------------------------------------------------|
-| `-starttls p`  | `STARTTLS`           | negotiate STARTTLS before the handshake: `smtp`, `imap`, `pop3`, `nntp`, `ftp` |
-| `-pin`         | `PINONLY`            | print only the base64 SPKI key pin(s) of the host(s)           |
-| `-verbose`     | `VERBOSE`            | add raw / PEM / OpenSSL certificate details                    |
-| `-html`        | `HTML`               | HTML output (for web pages, reports, ...)                      |
-| `-no-color`    | `NO_COLOR`           | plain ASCII output, no ANSI colors (post-processing, ...)      |
-| `-version`     | —                    | print the version (injected from the git tag at build time) and exit |
+| Flag           | Environment variable | Effect                                                          |
+|----------------|----------------------|-----------------------------------------------------------------|
+| `-starttls p`  | `STARTTLS`           | negotiate STARTTLS first: `smtp`, `imap`, `pop3`, `nntp`, `ftp` |
+| `-pin`         | `PINONLY`            | print only the base64 SPKI key pin(s)                            |
+| `-verbose`     | `VERBOSE`            | add raw / PEM / OpenSSL certificate details                      |
+| `-html`        | `HTML`               | HTML output, escaped and ready for a page                        |
+| `-no-color`    | `NO_COLOR`           | plain ASCII output, no ANSI colors                               |
+| `-version`     | -                    | print the build-time version and exit                            |
 
-Exit codes: `0` all checks succeeded, `1` a host check failed
-(unreachable, failed handshake, ...), `2` usage error (including flags after
-the host list).
+Flags go **before** the hosts (`tlsinfo -pin github.com`, not `tlsinfo github.com -pin`).
+Piped hosts win when the stream carries any; otherwise the command line is used.
+
+Exit codes: `0` every check succeeded, `1` a host check failed (unreachable, failed
+handshake, ...), `2` usage error.
 
 ### STARTTLS
 
-Analyze mail or news servers that speak TLS only after an in-band upgrade:
+Analyze mail and news servers that only speak TLS after an in-band upgrade:
 
 ```shell
-tlsinfo -starttls smtp smtp.gmail.com:587
-tlsinfo -starttls imap mail.example.com
+tlsinfo -starttls smtp  smtp.gmail.com:587
+tlsinfo -starttls imap  mail.example.com
+tlsinfo -starttls pop3  mail.example.com
+tlsinfo -starttls nntp  news.example.com
+tlsinfo -starttls ftp   ftp.example.com
 ```
+
+The protocol name is case- and whitespace-insensitive (`SMTP`, ` smtp ` both work), and the
+default port is appended automatically.
 
 ### Key pins
 
 ```shell
-# fetch the base64 SPKI key pin of a host (TOFU first use)
+# fetch the base64 SPKI pin of a host
 tlsinfo -pin github.com
 
 # works via STARTTLS too
 tlsinfo -pin -starttls smtp smtp.gmail.com:587
 ```
 
+Pin verification lives in the library (`PinVerifyHost`, `PinVerifyStartTLS`), so a pin
+becomes a one-line check in your deploy pipeline.
+
 ## Library
 
-Full TLS state report of a host:
+The CLI is a thin wrapper around a pure Go engine. Import it and get the same report
+without shelling out.
 
 ```go
 package main
@@ -167,24 +224,24 @@ import (
 )
 
 func main() {
-	os.Stdout.Write([]byte(tlsinfo.ReportHostText("github.com")))
+	os.Stdout.WriteString(tlsinfo.ReportHostText("github.com"))
 }
 ```
 
-Report your own clients from inside an HTTP handler:
+Report the clients that hit your own HTTPS endpoint:
 
 ```go
-// r is the *http.Request within your http handler
+// r is the *http.Request inside your handler
 report := tlsinfo.ReportHttpRequestHTML(r)
 ```
 
-Verify a host key pin (SPKI trust-on-first-use):
+Verify a trust-on-first-use pin:
 
 ```go
 ok := tlsinfo.PinVerifyHost("/wiL5vgOLgwED41WS0DNF8QiTBVR/P41Kd163tmFxK0=", "github.com")
 ```
 
-Test a mail server via STARTTLS (SMTP, IMAP, POP3, NNTP, FTP):
+Check a mail server through STARTTLS:
 
 ```go
 report := tlsinfo.ReportStartTLSText("smtp.gmail.com:587", tlsinfo.SMTP)
@@ -193,45 +250,72 @@ pin := tlsinfo.PinStartTLS("smtp.gmail.com:587", tlsinfo.SMTP, &tls.Config{})
 
 ### API
 
-| Function                                     | Input                                     |
-|----------------------------------------------|-------------------------------------------|
+| Function | Input |
+|----------|-------|
 | `ReportHostText` / `ReportHostHTML` / `ReportHost` | hostname (+ `tls.Config`, `*reportstyle.Style`) |
-| `ReportConnText` / `ReportConnHTML` / `ReportConn` | established `*tls.Conn`                  |
-| `ReportTlsStateText` / `ReportTlsStateHTML` / `ReportTlsState` | `*tls.ConnectionState`          |
+| `ReportConnText` / `ReportConnHTML` / `ReportConn` | established `*tls.Conn` |
+| `ReportTlsStateText` / `ReportTlsStateHTML` / `ReportTlsState` | `*tls.ConnectionState` |
 | `ReportHttpRequestText` / `ReportHttpRequestHTML` / `ReportHttpRequest` | server-side `*http.Request` |
-| `ReportOcsp`                                 | `*tls.Conn` + issuer `*x509.Certificate` (bound to the leaf, stale responses flagged) |
+| `ReportOcsp` | `*tls.Conn` + issuer `*x509.Certificate` (bound to the leaf, stale responses flagged) |
 | `ReportStartTLS` / `ReportStartTLSText` / `ReportStartTLSHTML` | hostname + `smtp`/`imap`/`pop3`/`nntp`/`ftp` |
-| `PinHost`, `PinHostWithTLS`                  | hostname (+ `tls.Config`)                 |
-| `PinStartTLS`                                | hostname + protocol (+ `tls.Config`)      |
-| `PinVerifyStartTLS`                          | key pin + hostname + protocol (+ `tls.Config`) |
-| `PinVerifyHost`, `PinVerifyHostWithTLS`      | key pin + hostname                        |
-| `PinVerifyConn`, `PinVerifyState`            | key pin + `*tls.Conn` / `*tls.ConnectionState` |
+| `PinHost`, `PinHostWithTLS` | hostname (+ `tls.Config`) |
+| `PinStartTLS` | hostname + protocol (+ `tls.Config`) |
+| `PinVerifyStartTLS` | key pin + hostname + protocol (+ `tls.Config`) |
+| `PinVerifyHost`, `PinVerifyHostWithTLS` | key pin + hostname |
+| `PinVerifyConn`, `PinVerifyState` | key pin + `*tls.Conn` / `*tls.ConnectionState` |
 
-Output format styles (via [`paepcke.de/reportstyle`](https://pkg.go.dev/paepcke.de/reportstyle)):
-plain text, ANSI color console, HTML, raw, or fully custom. Dynamic values
-(server name, ALPN, error text, ...) are passed through the style sanitizer
-(`Style.SaniFunc`), so HTML reports are escaped against injection. Reports are
-wrapped in the style `Start`/`End` markers when the style defines them.
+Output styles come from [`paepcke.de/reportstyle`](https://pkg.go.dev/paepcke.de/reportstyle):
+plain text, ANSI console, HTML, or fully custom. Dynamic values (server name, ALPN, error
+text, ...) pass through the style sanitizer, so HTML reports are escaped against injection
+and wrapped in the style's `Start`/`End` markers.
 
-The library never mutates a caller-supplied `*tls.Config` (it clones it before
-forcing `InsecureSkipVerify` for inspection) and tolerates `nil` styles,
-connections and requests by returning a tagged error string or a plain-text
-report.
+Library guarantees worth knowing:
+
+- your `*tls.Config` is **cloned**, never mutated, even though inspection forces
+  `InsecureSkipVerify`;
+- `nil` styles, connections and requests are tolerated (plain-text report or tagged error,
+  never a panic);
+- the library never writes to stdout. Output is always the returned string.
+
+## How it works
+
+1. The host is normalized (`:443` appended, bare IPv6 bracketed, empty hosts are rejected
+   instead of probing localhost).
+2. A TLS connection is opened, or a plaintext one upgraded through the protocol table.
+3. `tls.ConnectionState` is walked and certificates are rendered by `certinfo`.
+4. The result is assembled with the requested style and sanitized on the way out.
+
+There is no daemon, no cache, no config and no background work. Each invocation is one
+connection and one report.
+
+## Design promises
+
+- **Boring dependency tree.** Standard library plus three focused direct packages, and only
+  the two transitive modules they require (`x/sys`, `certificate-transparency-go`). No
+  framework, no CLI toolkit, no YAML loader.
+- **Static binary.** `CGO_ENABLED=0` everywhere, including releases.
+- **Offline tests.** The suite spins up loopback TLS and STARTTLS servers; `make test`
+  never touches the network.
+- **Readable failures.** Errors are embedded in the returned string as
+  `[tlsinfo] [error] ...` / `[starttls] [error] ...`, so CLI exit codes and logs stay simple.
+- **No surprises in HTML.** Every injected value is escaped through the style sanitizer.
 
 ## Documentation
 
 - [pkg.go.dev/paepcke.de/tlsinfo](https://pkg.go.dev/paepcke.de/tlsinfo)
 - Machine-readable repo overview for LLMs: [llms.txt](llms.txt)
+- Agent/contributor notes: [AGENTS.md](AGENTS.md)
 - Found a security issue? See [SECURITY.md](SECURITY.md)
 
 ## Contributing
 
-Yes, please! PRs welcome — see [CONTRIBUTING.md](CONTRIBUTING.md) for the ground rules.
+Yes, please! PRs, issues and reproductions are welcome. Start with
+[CONTRIBUTING.md](CONTRIBUTING.md), run `make test`, and keep the zero-dependency
+philosophy intact.
 
 ## License
 
-This project is licensed under the terms of the `BSD 3-Clause License`.
-See [LICENSE](https://github.com/paepckehh/tlsinfo/blob/master/LICENSE) for details.
+BSD 3-Clause. See [LICENSE](https://github.com/paepckehh/tlsinfo/blob/master/LICENSE).
 
 ## Citation
 
