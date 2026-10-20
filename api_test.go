@@ -48,12 +48,18 @@ func testCA(t *testing.T) (*x509.Certificate, *ecdsa.PrivateKey) {
 // testLeaf ...
 func testLeaf(t *testing.T, ca *x509.Certificate, caKey *ecdsa.PrivateKey) (*x509.Certificate, *ecdsa.PrivateKey) {
 	t.Helper()
+	return testLeafSerial(t, ca, caKey, 2)
+}
+
+// testLeafSerial ...
+func testLeafSerial(t *testing.T, ca *x509.Certificate, caKey *ecdsa.PrivateKey, serial int64) (*x509.Certificate, *ecdsa.PrivateKey) {
+	t.Helper()
 	key, err := ecdsa.GenerateKey(elliptic.P256(), rand.Reader)
 	if err != nil {
 		t.Fatal(err)
 	}
 	tmpl := &x509.Certificate{
-		SerialNumber: big.NewInt(2),
+		SerialNumber: big.NewInt(serial),
 		Subject:      pkix.Name{CommonName: "tlsinfo test leaf"},
 		DNSNames:     []string{"example.test"},
 		NotBefore:    time.Now().Add(-time.Hour),
@@ -86,6 +92,12 @@ func testServer(t *testing.T) (addr string, ca, leaf *x509.Certificate) {
 	if err != nil {
 		t.Fatal(err)
 	}
+	return testStapleServer(t, ca, leaf, leafKey, staple), ca, leaf
+}
+
+// testStapleServer ...
+func testStapleServer(t *testing.T, ca, leaf *x509.Certificate, leafKey *ecdsa.PrivateKey, staple []byte) string {
+	t.Helper()
 	listener, err := tls.Listen(_tcp, "127.0.0.1:0", &tls.Config{
 		Certificates: []tls.Certificate{{
 			Certificate: [][]byte{leaf.Raw, ca.Raw},
@@ -111,7 +123,7 @@ func testServer(t *testing.T) (addr string, ca, leaf *x509.Certificate) {
 			}(conn.(*tls.Conn))
 		}
 	}()
-	return listener.Addr().String(), ca, leaf
+	return listener.Addr().String()
 }
 
 // testTlsState ...
@@ -250,6 +262,123 @@ func TestReportOcsp(t *testing.T) {
 	}
 	if got := ReportOcsp(conn, nil); got == "" || got == "Good [OK]" {
 		t.Errorf("ReportOcsp(conn, nil) must return the raw hex response, got %q", got)
+	}
+}
+
+// TestReportOcspSerialBinding ...
+func TestReportOcspSerialBinding(t *testing.T) {
+	ca, caKey := testCA(t)
+	leaf, leafKey := testLeaf(t, ca, caKey)
+	other, _ := testLeafSerial(t, ca, caKey, 3)
+	staple, err := ocsp.CreateResponse(ca, ca, ocsp.Response{
+		Status:       ocsp.Good,
+		SerialNumber: other.SerialNumber,
+		ThisUpdate:   time.Now(),
+		NextUpdate:   time.Now().Add(time.Hour),
+	}, caKey)
+	if err != nil {
+		t.Fatal(err)
+	}
+	addr := testStapleServer(t, ca, leaf, leafKey, staple)
+	conn, err := tls.Dial(_tcp, addr, &tls.Config{InsecureSkipVerify: true})
+	if err != nil {
+		t.Fatal(err)
+	}
+	defer func() { _ = conn.Close() }()
+	if got := ReportOcsp(conn, ca); !strings.Contains(got, "[error]") {
+		t.Errorf("ReportOcsp() = %q, want a mismatch error for a staple issued for another certificate", got)
+	}
+}
+
+// TestReportOcspStale ...
+func TestReportOcspStale(t *testing.T) {
+	ca, caKey := testCA(t)
+	leaf, leafKey := testLeaf(t, ca, caKey)
+	staple, err := ocsp.CreateResponse(ca, ca, ocsp.Response{
+		Status:       ocsp.Good,
+		SerialNumber: leaf.SerialNumber,
+		ThisUpdate:   time.Now().Add(-2 * time.Hour),
+		NextUpdate:   time.Now().Add(-time.Hour),
+	}, caKey)
+	if err != nil {
+		t.Fatal(err)
+	}
+	addr := testStapleServer(t, ca, leaf, leafKey, staple)
+	conn, err := tls.Dial(_tcp, addr, &tls.Config{InsecureSkipVerify: true})
+	if err != nil {
+		t.Fatal(err)
+	}
+	defer func() { _ = conn.Close() }()
+	if got := ReportOcsp(conn, ca); !strings.Contains(got, "stale response") {
+		t.Errorf("ReportOcsp() = %q, want a stale response warning", got)
+	}
+}
+
+// TestReportTlsStateHTML ...
+func TestReportTlsStateHTML(t *testing.T) {
+	t.Parallel()
+	out := ReportTlsStateHTML(&tls.ConnectionState{
+		HandshakeComplete:  true,
+		Version:            tls.VersionTLS13,
+		ServerName:         `<script>alert(1)</script>`,
+		NegotiatedProtocol: `<img src=x onerror=alert(2)>`,
+	})
+	if strings.Contains(out, "<script>") || strings.Contains(out, "<img") {
+		t.Errorf("ReportTlsStateHTML() must escape dynamic values, got:\n%s", out)
+	}
+	if !strings.Contains(out, "&lt;script&gt;") {
+		t.Errorf("ReportTlsStateHTML() must render the escaped server name, got:\n%s", out)
+	}
+	style := reportstyle.StyleHTML()
+	if !strings.HasPrefix(out, style.Start) || !strings.HasSuffix(out, style.End) {
+		t.Errorf("ReportTlsStateHTML() must be wrapped in the style document markers")
+	}
+}
+
+// TestNilArguments ...
+func TestNilArguments(t *testing.T) {
+	t.Parallel()
+	if out := ReportTlsState(nil, nil); !strings.Contains(out, "TLS Version") {
+		t.Errorf("ReportTlsState(nil, nil) must not panic, got %q", out)
+	}
+	for name, out := range map[string]string{
+		"ReportConn":        ReportConn(nil, nil),
+		"ReportHttpRequest": ReportHttpRequest(nil, nil),
+		"ReportOcsp":        ReportOcsp(nil, nil),
+	} {
+		if !strings.Contains(out, "[error]") {
+			t.Errorf("%s(nil) = %q, want a tagged error", name, out)
+		}
+	}
+	if PinVerifyConn("pin", nil) {
+		t.Error("PinVerifyConn(nil) = true, want false")
+	}
+}
+
+// TestReportTlsStateWithoutVerifiedChains ...
+func TestReportTlsStateWithoutVerifiedChains(t *testing.T) {
+	t.Parallel()
+	if out := ReportTlsState(&tls.ConnectionState{HandshakeComplete: true}, reportstyle.StyleText()); !strings.Contains(out, "[none] [chain verification not performed") {
+		t.Errorf("ReportTlsState() without verified chains must explain the empty section, got:\n%s", out)
+	}
+}
+
+// TestConfigNotMutated ...
+func TestConfigNotMutated(t *testing.T) {
+	addr, _, _ := testServer(t)
+	cfg := &tls.Config{}
+	if out := ReportHost(addr, cfg, reportstyle.StyleText()); strings.Contains(out, "[error]") {
+		t.Fatalf("ReportHost() = %q, want a report", out)
+	}
+	if cfg.InsecureSkipVerify {
+		t.Error("ReportHost() mutated the caller's tls.Config")
+	}
+	pinCfg := &tls.Config{}
+	if pin := PinHostWithTLS(addr, pinCfg); strings.Contains(pin, "[error]") {
+		t.Fatalf("PinHostWithTLS() = %q, want a key pin", pin)
+	}
+	if pinCfg.InsecureSkipVerify {
+		t.Error("PinHostWithTLS() mutated the caller's tls.Config")
 	}
 }
 

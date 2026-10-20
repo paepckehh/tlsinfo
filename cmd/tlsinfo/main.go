@@ -7,7 +7,6 @@ import (
 	"flag"
 	"fmt"
 	"io"
-	"log"
 	"os"
 	"strings"
 
@@ -56,18 +55,18 @@ func main() {
 		style.Raw = true
 	}
 	var failed bool
-	switch {
-	case isPipe():
-		for _, host := range pipeHosts() {
-			failed = report(host, *proto, *pin, style) || failed
-		}
-	case len(flag.Args()) > 0:
-		for _, host := range flag.Args() {
-			failed = report(host, *proto, *pin, style) || failed
-		}
-	default:
+	hosts := inputHosts(flag.Args())
+	if len(hosts) == 0 {
 		usage()
 		os.Exit(2)
+	}
+	if err := checkArgs(hosts); err != nil {
+		fmt.Fprintln(os.Stderr, _app+_err+err.Error())
+		usage()
+		os.Exit(2)
+	}
+	for _, host := range hosts {
+		failed = report(host, *proto, *pin, style) || failed
 	}
 	if failed {
 		os.Exit(1)
@@ -99,14 +98,47 @@ func report(host, proto string, pin bool, style *reportstyle.Style) bool {
 		msg = tlsinfo.ReportHost(host, &tls.Config{}, style)
 	}
 	out(msg)
-	return strings.Contains(msg, _err)
+	return isErr(msg)
+}
+
+// isErr ...
+func isErr(msg string) bool {
+	return strings.HasPrefix(msg, "[tlsinfo] [error]") || strings.HasPrefix(msg, "[starttls] [error]")
+}
+
+// inputHosts ... piped input wins when it carries hosts, otherwise the command line is used
+func inputHosts(args []string) []string {
+	if isPipe() {
+		if hosts := pipeHosts(); len(hosts) > 0 {
+			return hosts
+		}
+	}
+	return args
+}
+
+// checkArgs ...
+func checkArgs(hosts []string) error {
+	for _, host := range hosts {
+		if strings.HasPrefix(host, "-") {
+			return fmt.Errorf("flags must precede hosts: %q", host)
+		}
+	}
+	return nil
 }
 
 // out ...
 func out(msg string) {
-	if _, err := os.Stdout.Write([]byte(msg)); err != nil {
+	if _, err := os.Stdout.WriteString(withNewline(msg)); err != nil {
 		panic("unrecoverable error, unable to write stdout")
 	}
+}
+
+// withNewline ...
+func withNewline(msg string) string {
+	if strings.HasSuffix(msg, "\n") {
+		return msg
+	}
+	return msg + "\n"
 }
 
 // isPipe ...
@@ -127,7 +159,8 @@ func pipeHosts() []string {
 func getPipe() string {
 	pipe, err := io.ReadAll(os.Stdin)
 	if err != nil {
-		log.Fatal(_app + _err + "reading data from pipe")
+		fmt.Fprintln(os.Stderr, _app+_err+"reading data from pipe")
+		os.Exit(1)
 	}
 	return string(pipe)
 }

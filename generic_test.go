@@ -45,6 +45,7 @@ func TestSplitAddr(t *testing.T) {
 	}{
 		{"ipv4", "127.0.0.1:443", "127.0.0.1", "443"},
 		{"ipv6", "[2001:db8::1]:4433", "2001:db8::1", "4433"},
+		{"missing host", ":443", "[none]", "443"},
 		{"missing port", "127.0.0.1", "127.0.0.1", "[none]"},
 		{"empty address", "", "[none]", "[none]"},
 	}
@@ -72,6 +73,11 @@ func TestAddCheckPort(t *testing.T) {
 		{"keeps ip port", "127.0.0.1:9", "127.0.0.1:9"},
 		{"appends port to bracketed ipv6", "[2001:db8::1]", "[2001:db8::1]:443"},
 		{"appends port to bare ipv6 literal", "2001:db8::1", "[2001:db8::1]:443"},
+		{"appends port after empty port", "github.com:", "github.com:443"},
+		{"appends port after empty ipv6 port", "[2001:db8::1]:", "[2001:db8::1]:443"},
+		{"trims surrounding whitespace", "  github.com  ", "github.com:443"},
+		{"empty host stays empty", "", ""},
+		{"blank host stays empty", "   ", ""},
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {

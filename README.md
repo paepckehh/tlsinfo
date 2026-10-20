@@ -44,7 +44,7 @@ A tiny CLI **and** a pure Go library. No flags, no config files, no bloat.
 - 🤝 **Handshake state** — TLS version, cipher suite, ALPN, resumption, SCT timestamps, with instant `[SECURITY ALERT]` / `[OK]` verdicts
 - 🚀 **STARTTLS testing** — upgrade plaintext connections and analyze the TLS layer (SMTP, IMAP, POP3, NNTP, FTP)
 - 📌 **Key pins** — SPKI base64 pins to build or verify trust-on-first-use (TOFU) pinning, even on untrusted or self-signed chains
-- 🛡️ **OCSP status** — stapled responses parsed and verified against the issuer, revoked certificates flagged as `[SECURITY ALERT]`
+- 🛡️ **OCSP status** — stapled responses verified against the issuer, bound to the presented leaf certificate (a staple for another certificate is rejected), with stale/expired responses flagged `[WARNING]`; revoked certificates flagged as `[SECURITY ALERT]`
 - 🧪 **Works everywhere** — 100% pure Go: stdlib + `paepcke.de/certinfo` + `paepcke.de/reportstyle` + `golang.org/x/crypto`, nothing else
 - 🎨 **Output your way** — ANSI console, plain ASCII, HTML, raw/PEM/OpenSSL detail, or fully custom styles
 - 🔌 **CLI *or* library** — same core, [library API](#library), compatible with `certinfo`, `dnsinfo`, ...
@@ -93,7 +93,7 @@ TLS Cipher Suite           : TLS_AES_128_GCM_SHA256
 TLS Uniq ID
 TLS Signed Timestamps
 TLS Verified Cert Chains
-
+[none] [chain verification not performed by this connection]
   X509 Cert Subject          : [CN=github.com]
   X509 Cert Status           : [VALID] [for the next 49 days]
   X509 Cert Signature Algo   : [VALID] [ECDSA-SHA256]
@@ -110,6 +110,11 @@ echo github.com | tlsinfo
 cat hosts.txt | tlsinfo
 ```
 
+Flags must precede the host list (`tlsinfo -pin github.com`, not
+`tlsinfo github.com -pin`), following POSIX conventions. Piped hosts take
+precedence; if the input stream carries no hosts, the command line hosts are
+used.
+
 ### Command line flags
 
 The CLI follows usual POSIX conventions (`tlsinfo -h` prints usage with the
@@ -125,8 +130,9 @@ existing scripts keep working (empty value = off, see [no-color.org](https://no-
 | `-no-color`    | `NO_COLOR`           | plain ASCII output, no ANSI colors (post-processing, ...)      |
 | `-version`     | —                    | print the version (injected from the git tag at build time) and exit |
 
-Exit codes: `0` all checks succeeded, `1` at least one host failed
-(unreachable, failed handshake, ...), `2` usage error.
+Exit codes: `0` all checks succeeded, `1` a host check failed
+(unreachable, failed handshake, ...), `2` usage error (including flags after
+the host list).
 
 ### STARTTLS
 
@@ -193,7 +199,7 @@ pin := tlsinfo.PinStartTLS("smtp.gmail.com:587", tlsinfo.SMTP, &tls.Config{})
 | `ReportConnText` / `ReportConnHTML` / `ReportConn` | established `*tls.Conn`                  |
 | `ReportTlsStateText` / `ReportTlsStateHTML` / `ReportTlsState` | `*tls.ConnectionState`          |
 | `ReportHttpRequestText` / `ReportHttpRequestHTML` / `ReportHttpRequest` | server-side `*http.Request` |
-| `ReportOcsp`                                 | `*tls.Conn` + issuer `*x509.Certificate` |
+| `ReportOcsp`                                 | `*tls.Conn` + issuer `*x509.Certificate` (bound to the leaf, stale responses flagged) |
 | `ReportStartTLS` / `ReportStartTLSText` / `ReportStartTLSHTML` | hostname + `smtp`/`imap`/`pop3`/`nntp`/`ftp` |
 | `PinHost`, `PinHostWithTLS`                  | hostname (+ `tls.Config`)                 |
 | `PinStartTLS`                                | hostname + protocol (+ `tls.Config`)      |
@@ -202,7 +208,15 @@ pin := tlsinfo.PinStartTLS("smtp.gmail.com:587", tlsinfo.SMTP, &tls.Config{})
 | `PinVerifyConn`, `PinVerifyState`            | key pin + `*tls.Conn` / `*tls.ConnectionState` |
 
 Output format styles (via [`paepcke.de/reportstyle`](https://pkg.go.dev/paepcke.de/reportstyle)):
-plain text, ANSI color console, HTML, raw, or fully custom.
+plain text, ANSI color console, HTML, raw, or fully custom. Dynamic values
+(server name, ALPN, error text, ...) are passed through the style sanitizer
+(`Style.SaniFunc`), so HTML reports are escaped against injection. Reports are
+wrapped in the style `Start`/`End` markers when the style defines them.
+
+The library never mutates a caller-supplied `*tls.Config` (it clones it before
+forcing `InsecureSkipVerify` for inspection) and tolerates `nil` styles,
+connections and requests by returning a tagged error string or a plain-text
+report.
 
 ## Documentation
 

@@ -68,6 +68,22 @@ func TestReadLine(t *testing.T) {
 	}
 }
 
+// TestReadLineTooLong ...
+func TestReadLineTooLong(t *testing.T) {
+	t.Parallel()
+	client, server := net.Pipe()
+	t.Cleanup(func() {
+		_ = client.Close()
+		_ = server.Close()
+	})
+	go func() {
+		_, _ = io.WriteString(server, strings.Repeat("a", _maxLine+1)+_crlf)
+	}()
+	if _, err := readLine(bufio.NewReader(client)); err == nil || !strings.Contains(err.Error(), "exceeds") {
+		t.Errorf("readLine() error = %v, want an overlong line error", err)
+	}
+}
+
 // TestStarttlsUpgrade ...
 func TestStarttlsUpgrade(t *testing.T) {
 	t.Parallel()
@@ -208,6 +224,16 @@ func TestReportStartTLS(t *testing.T) {
 	}
 	if out := ReportStartTLS(addr, "SMTP", &tls.Config{}, reportstyle.StyleText()); strings.Contains(out, "[error]") { // protocol identifiers are case-insensitive
 		t.Errorf("ReportStartTLS(SMTP uppercase) = %q, want a finished handshake", out)
+	}
+	if out := ReportStartTLS(addr, " smtp ", &tls.Config{}, reportstyle.StyleText()); strings.Contains(out, "[error]") { // and whitespace tolerant
+		t.Errorf("ReportStartTLS(whitespace padded) = %q, want a finished handshake", out)
+	}
+	cfg := &tls.Config{}
+	if out := ReportStartTLS(addr, SMTP, cfg, reportstyle.StyleText()); strings.Contains(out, "[error]") {
+		t.Fatalf("ReportStartTLS() = %q, want a report", out)
+	}
+	if cfg.InsecureSkipVerify {
+		t.Error("ReportStartTLS() mutated the caller's tls.Config")
 	}
 	pin := certinfo.KeyPinBase64(leaf)
 	if got := PinStartTLS(addr, SMTP, &tls.Config{}); got != pin {

@@ -6,6 +6,7 @@ import (
 	"fmt"
 	"io"
 	"net"
+	"slices"
 	"strings"
 	"time"
 )
@@ -54,14 +55,26 @@ func addStarttlsPort(proto, host string) (string, error) {
 
 // starttlsUnsupported ...
 func starttlsUnsupported(proto string) error {
-	return fmt.Errorf("[starttls] [error] [unsupported protocol: %q] [supported: %s, %s, %s, %s, %s]", proto, SMTP, IMAP, POP3, NNTP, FTP)
+	return fmt.Errorf("[starttls] [error] [unsupported protocol: %q] [supported: %s]", proto, starttlsSupported())
+}
+
+// starttlsSupported ...
+func starttlsSupported() string {
+	names := make([]string, 0, len(_starttlsProtocols))
+	for name := range _starttlsProtocols {
+		names = append(names, name)
+	}
+	slices.Sort(names)
+	return strings.Join(names, ", ")
 }
 
 // starttlsDial ...
 func starttlsDial(proto, host string, t *tls.Config) (*tls.Conn, error) {
-	proto = strings.ToLower(proto)
+	proto = strings.TrimSpace(strings.ToLower(proto))
 	if t == nil {
 		t = &tls.Config{}
+	} else {
+		t = t.Clone() // never mutate the caller's config
 	}
 	t.InsecureSkipVerify = true // skip here to get tls.ConnectionState()
 	addr, err := addStarttlsPort(proto, host)
@@ -139,9 +152,19 @@ func reply(r *bufio.Reader, conn net.Conn, send, want string) error {
 
 // readLine ...
 func readLine(r *bufio.Reader) (string, error) {
-	line, err := r.ReadString(_linefeed[0])
-	if err != nil && (err != io.EOF || line == "") { // accept a final line that lacks its newline
-		return "", err
+	var line []byte
+	for {
+		chunk, err := r.ReadSlice(_linefeed[0])
+		line = append(line, chunk...)
+		if len(line) > _maxLine {
+			return "", fmt.Errorf("[starttls] [error] [response line exceeds %d bytes]", _maxLine)
+		}
+		if err == bufio.ErrBufferFull {
+			continue
+		}
+		if err != nil && (err != io.EOF || len(line) == 0) { // accept a final line that lacks its newline
+			return "", err
+		}
+		return strings.TrimRight(string(line), _crlf), nil
 	}
-	return strings.TrimRight(line, _crlf), nil
 }

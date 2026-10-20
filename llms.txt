@@ -24,14 +24,15 @@ Repo: https://github.com/paepckehh/tlsinfo | Docs: https://pkg.go.dev/paepcke.de
 - `PinHost` / `PinVerifyHost` — SPKI base64 key pins, trust-on-first-use
 - `ReportTlsState` / `ReportConn` — report from `tls.ConnectionState` / `*tls.Conn`
 - `ReportHttpRequest` — server-side variant: report your own HTTPS clients
-- `ReportOcsp` — stapled OCSP status (needs the issuer certificate)
+- `ReportOcsp` — stapled OCSP status (needs the issuer certificate; the response is bound to the presented leaf and stale responses are flagged)
 
 ## Conventions
 
-- CLI: POSIX flags (`-starttls`, `-pin`, `-verbose`, `-html`, `-no-color`, `-version`); env vars `NO_COLOR`, `VERBOSE`, `HTML`, `PINONLY`, `STARTTLS` act as fallback defaults (empty = off)
+- CLI: POSIX flags (`-starttls`, `-pin`, `-verbose`, `-html`, `-no-color`, `-version`); flags must precede hosts; env vars `NO_COLOR`, `VERBOSE`, `HTML`, `PINONLY`, `STARTTLS` act as fallback defaults (empty = off); piped hosts win, empty input falls back to argv
 - CLI exit codes: 0 ok, 1 host check failed, 2 usage error; version injected at build time via `-ldflags "-X main._version=<git tag>"` (shown at startup, in `-h`, and via `-version`)
-- Errors embedded in returned strings: `[tlsinfo]` / `[starttls]` `[error] ...`
-- STARTTLS protocols: `smtp`, `imap`, `pop3`, `nntp`, `ftp`
+- Errors embedded in returned strings: `[tlsinfo]` / `[starttls]` `[error] ...`; the CLI appends the missing newline
+- Output values are passed through `Style.SaniFunc` (HTML escaping), reports are wrapped in `Style.Start`/`End`; caller `*tls.Config` is cloned, never mutated
+- STARTTLS protocols: `smtp`, `imap`, `pop3`, `nntp`, `ftp`; one response line is capped at 4096 bytes
 - go 1.27, CGO disabled, gofmt -s; `v*` tag pushes cut goreleaser releases
 
 ## For agents

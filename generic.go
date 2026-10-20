@@ -21,6 +21,7 @@ const (
 	_linefeed    = "\n"
 	_doublepoint = ":"
 	_dialWait    = 30 * time.Second
+	_maxLine     = 4096 // cap for one STARTTLS response line, a hostile server must not grow it without bound
 )
 
 // build ...
@@ -34,6 +35,30 @@ func build(in string, e *reportstyle.Style) string {
 	return e.LE
 }
 
+// esc ...
+func esc(in string, e *reportstyle.Style) string {
+	if e != nil && e.SaniFunc != nil {
+		return e.SaniFunc(in)
+	}
+	return in
+}
+
+// styleOr ...
+func styleOr(e *reportstyle.Style) *reportstyle.Style {
+	if e == nil {
+		return reportstyle.StyleText()
+	}
+	return e
+}
+
+// document ...
+func document(in string, e *reportstyle.Style) string {
+	if e.Start == "" && e.End == "" {
+		return in
+	}
+	return e.Start + in + e.End
+}
+
 // splitAddr ...
 func splitAddr(addr string) (string, string) {
 	host, port, err := net.SplitHostPort(addr)
@@ -43,13 +68,22 @@ func splitAddr(addr string) (string, string) {
 		}
 		return addr, _none
 	}
+	if host == "" {
+		host = _none
+	}
 	return host, port
 }
 
 // addPort ...
 func addPort(host, port string) string {
-	if _, _, err := net.SplitHostPort(host); err == nil {
+	host = strings.TrimSpace(host)
+	if host == "" {
+		return "" // let the dialer report a missing address instead of probing localhost
+	}
+	if h, p, err := net.SplitHostPort(host); err == nil && p != "" {
 		return host
+	} else if err == nil {
+		host = h // strip an empty port (host:) and append the default below
 	}
 	if strings.Contains(host, _doublepoint) && !strings.HasPrefix(host, "[") {
 		return "[" + host + "]" + port // unbracketed ipv6 literal

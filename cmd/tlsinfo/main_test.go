@@ -60,6 +60,68 @@ func TestPipeHosts(t *testing.T) {
 	}
 }
 
+// TestWithNewline ...
+func TestWithNewline(t *testing.T) {
+	t.Parallel()
+	tests := []struct {
+		in   string
+		want string
+	}{
+		{"", "\n"},
+		{"pin", "pin\n"},
+		{"report\n", "report\n"},
+	}
+	for _, tt := range tests {
+		if got := withNewline(tt.in); got != tt.want {
+			t.Errorf("withNewline(%q) = %q, want %q", tt.in, got, tt.want)
+		}
+	}
+}
+
+// TestIsErr ...
+func TestIsErr(t *testing.T) {
+	t.Parallel()
+	tests := []struct {
+		in   string
+		want bool
+	}{
+		{"[tlsinfo] [error] [connect] x", true},
+		{"[starttls] [error] [connect] x", true},
+		{"NET Remote Address        : 127.0.0.1\nTLS OCSP Status           : [error] in cert text\n", false},
+		{"Good [OK]\n", false},
+	}
+	for _, tt := range tests {
+		if got := isErr(tt.in); got != tt.want {
+			t.Errorf("isErr(%q) = %t, want %t", tt.in, got, tt.want)
+		}
+	}
+}
+
+// TestCheckArgs ...
+func TestCheckArgs(t *testing.T) {
+	t.Parallel()
+	if err := checkArgs([]string{"github.com", "paepcke.de"}); err != nil {
+		t.Errorf("checkArgs(hosts) unexpected error: %s", err.Error())
+	}
+	if err := checkArgs([]string{"github.com", "-pin"}); err == nil {
+		t.Error("checkArgs() must reject a flag after a host")
+	}
+}
+
+// TestInputHosts ...
+func TestInputHosts(t *testing.T) {
+	old := os.Stdin
+	os.Stdin = stdin(t, "github.com\n")
+	defer func() { os.Stdin = old }()
+	if got := inputHosts([]string{"paepcke.de"}); !reflect.DeepEqual(got, []string{"github.com"}) {
+		t.Errorf("inputHosts() = %v, want the piped host", got)
+	}
+	os.Stdin = stdin(t, "\n")
+	if got := inputHosts([]string{"paepcke.de"}); !reflect.DeepEqual(got, []string{"paepcke.de"}) {
+		t.Errorf("inputHosts() = %v, want the command line fallback for empty input", got)
+	}
+}
+
 // stdin ...
 func stdin(t *testing.T, content string) *os.File {
 	t.Helper()

@@ -6,11 +6,11 @@ import (
 	"crypto/tls"
 	"crypto/x509"
 	"encoding/hex"
-	"fmt"
 	"net"
 	"net/http"
 	"strconv"
 	"strings"
+	"time"
 
 	"golang.org/x/crypto/ocsp"
 	"paepcke.de/certinfo"
@@ -88,6 +88,9 @@ func PinVerifyHost(keyPin, host string) bool {
 
 // PinVerifyConn ...
 func PinVerifyConn(keyPin string, conn *tls.Conn) bool {
+	if conn == nil {
+		return false
+	}
 	state := conn.ConnectionState()
 	return PinVerifyState(keyPin, &state)
 }
@@ -110,57 +113,72 @@ func PinVerifyState(keyPin string, state *tls.ConnectionState) bool {
 func ReportHost(host string, t *tls.Config, e *reportstyle.Style) string {
 	if t == nil {
 		t = &tls.Config{}
+	} else {
+		t = t.Clone() // never mutate the caller's config
 	}
 	t.InsecureSkipVerify = true // skip here to get  tls.ConnectionState()
+	e = styleOr(e)
 	conn, err := tls.DialWithDialer(&net.Dialer{Timeout: _dialWait}, _tcp, addCheckPort(host), t)
 	if err != nil {
-		return "[tlsinfo] [error] [connect] " + host + " -> " + err.Error()
+		return esc("[tlsinfo] [error] [connect] "+host+" -> "+err.Error(), e)
 	}
 	defer func() {
-		if err := conn.Close(); err != nil {
-			fmt.Printf("[tlsinfo] [error] during connection close: %s", err.Error())
-		}
+		_ = conn.Close()
 	}()
 	return ReportConn(conn, e)
 }
 
 // ReportConn ...
 func ReportConn(conn *tls.Conn, e *reportstyle.Style) string {
+	if conn == nil {
+		return "[tlsinfo] [error] [conn] [nil connection]"
+	}
+	e = styleOr(e)
 	state := conn.ConnectionState()
 	localHost, localPort := splitAddr(conn.LocalAddr().String())
 	remoteHost, remotePort := splitAddr(conn.RemoteAddr().String())
 	var s strings.Builder
-	s.WriteString(e.L1 + "NET Local Address         " + e.L2 + localHost + e.LE)
-	s.WriteString(e.L1 + "NET Local Port            " + e.L2 + localPort + e.LE)
-	s.WriteString(e.L1 + "NET Remote Address        " + e.L2 + remoteHost + e.LE)
-	s.WriteString(e.L1 + "NET Remote Port           " + e.L2 + remotePort + e.LE)
+	s.WriteString(e.L1 + "NET Local Address         " + e.L2 + esc(localHost, e) + e.LE)
+	s.WriteString(e.L1 + "NET Local Port            " + e.L2 + esc(localPort, e) + e.LE)
+	s.WriteString(e.L1 + "NET Remote Address        " + e.L2 + esc(remoteHost, e) + e.LE)
+	s.WriteString(e.L1 + "NET Remote Port           " + e.L2 + esc(remotePort, e) + e.LE)
 	if len(state.PeerCertificates) > 0 {
 		issuer := state.PeerCertificates[0]
 		if len(state.PeerCertificates) > 1 {
 			issuer = state.PeerCertificates[1]
 		}
 		if msg := ReportOcsp(conn, issuer); len(msg) > 0 {
-			s.WriteString(e.L1 + "TLS OCSP Status           " + build(msg, e))
+			s.WriteString(e.L1 + "TLS OCSP Status           " + build(esc(msg, e), e))
 		}
 	}
-	s.WriteString(ReportTlsState(&state, e))
-	return s.String()
+	s.WriteString(tlsState(&state, e))
+	return document(s.String(), e)
 }
 
 // ReportHttpRequest ...
 func ReportHttpRequest(q *http.Request, e *reportstyle.Style) string {
+	if q == nil {
+		return "[tlsinfo] [error] [http] [nil request]"
+	}
+	e = styleOr(e)
 	remoteHost, remotePort := splitAddr(q.RemoteAddr)
 	var s strings.Builder
-	s.WriteString(e.L1 + "NET Remote Address        " + e.L2 + remoteHost + e.LE)
-	s.WriteString(e.L1 + "NET Remote Port           " + e.L2 + remotePort + e.LE)
-	s.WriteString(e.L1 + "HTTP Protocol             " + e.L2 + q.Proto + e.LE)
-	s.WriteString(e.L1 + "HTTP Transfer Encoding    " + e.L2 + strings.Join(q.TransferEncoding, _space) + e.LE)
-	s.WriteString(ReportTlsState(q.TLS, e))
-	return s.String()
+	s.WriteString(e.L1 + "NET Remote Address        " + e.L2 + esc(remoteHost, e) + e.LE)
+	s.WriteString(e.L1 + "NET Remote Port           " + e.L2 + esc(remotePort, e) + e.LE)
+	s.WriteString(e.L1 + "HTTP Protocol             " + e.L2 + esc(q.Proto, e) + e.LE)
+	s.WriteString(e.L1 + "HTTP Transfer Encoding    " + e.L2 + esc(strings.Join(q.TransferEncoding, _space), e) + e.LE)
+	s.WriteString(tlsState(q.TLS, e))
+	return document(s.String(), e)
 }
 
 // ReportTlsState ...
 func ReportTlsState(state *tls.ConnectionState, e *reportstyle.Style) string {
+	e = styleOr(e)
+	return document(tlsState(state, e), e)
+}
+
+// tlsState ...
+func tlsState(state *tls.ConnectionState, e *reportstyle.Style) string {
 	if state == nil {
 		state = &tls.ConnectionState{}
 	}
@@ -172,39 +190,59 @@ func ReportTlsState(state *tls.ConnectionState, e *reportstyle.Style) string {
 	if len(state.SignedCertificateTimestamps) > 0 {
 		ts = string(bytes.Join(state.SignedCertificateTimestamps, []byte(_linefeed)))
 	}
+	verified := certinfo.CertStores(state.VerifiedChains, certReport)
+	if strings.TrimSpace(verified) == "" {
+		verified = "[none] [chain verification not performed by this connection]"
+	}
 	var s strings.Builder
 	s.WriteString(e.L1 + "TLS Handshake Finished    " + e.L2 + strconv.FormatBool(state.HandshakeComplete) + e.LE)
 	s.WriteString(e.L1 + "TLS Version               " + e.L2 + version(state.Version, true) + e.LE)
-	s.WriteString(e.L1 + "TLS ALPN                  " + e.L2 + state.NegotiatedProtocol + e.LE)
+	s.WriteString(e.L1 + "TLS ALPN                  " + e.L2 + esc(state.NegotiatedProtocol, e) + e.LE)
 	s.WriteString(e.L1 + "TLS Resumed               " + e.L2 + strconv.FormatBool(state.DidResume) + e.LE)
-	s.WriteString(e.L1 + "TLS Server Name           " + e.L2 + state.ServerName + e.LE)
+	s.WriteString(e.L1 + "TLS Server Name           " + e.L2 + esc(state.ServerName, e) + e.LE)
 	s.WriteString(e.L1 + "TLS Cipher Suite          " + e.L2 + tls.CipherSuiteName(state.CipherSuite) + e.LE)
 	//nolint:all - keep as informative point, besides linter correct security concerns
 	s.WriteString(e.L1 + "TLS Uniq ID               " + build(hex.EncodeToString(state.TLSUnique), e))
 	s.WriteString(e.L1 + "TLS Signed Timestamps     " + build(ts, e))
-	s.WriteString(e.L1 + "TLS Verified Cert Chains\n" + build(certinfo.CertStores(state.VerifiedChains, certReport), e))
+	s.WriteString(e.L1 + "TLS Verified Cert Chains\n" + build(verified, e))
 	s.WriteString(e.L1 + "TLS Peer Send Certs\n" + build(certinfo.CertStore(state.PeerCertificates, certReport), e))
 	return s.String()
 }
 
 // ReportOcsp ...
 func ReportOcsp(conn *tls.Conn, issuerCert *x509.Certificate) string {
+	if conn == nil {
+		return "[tlsinfo] [error] [ocsp] [nil connection]"
+	}
 	ocspResponse := conn.OCSPResponse()
 	if len(ocspResponse) > 8 && issuerCert != nil {
-		r, err := ocsp.ParseResponse(ocspResponse, issuerCert)
+		var leaf *x509.Certificate
+		if certs := conn.ConnectionState().PeerCertificates; len(certs) > 0 {
+			leaf = certs[0]
+		}
+		r, err := ocsp.ParseResponseForCert(ocspResponse, leaf, issuerCert) // bind the response to the presented leaf
 		if err != nil {
 			return "[tlsinfo] [error] [ocsp] " + err.Error()
 		}
 		// @UPSTREAM golang.org/x/crypto/ocsp: Response.Status is plain int {Good=0|Revoked=1|Unknown=2}, NOT type ResponseStatus (success/malformed/...)
+		var status string
 		switch r.Status {
 		case ocsp.Good:
-			return "Good [OK]"
+			status = "Good [OK]"
 		case ocsp.Revoked:
-			return "Revoked [SECURITY ALERT]"
+			status = "Revoked [SECURITY ALERT]"
 		case ocsp.Unknown:
-			return "Unknown [WARNING]"
+			status = "Unknown [WARNING]"
+		default:
+			status = "Invalid OCSP Status Token"
 		}
-		return "Invalid OCSP Status Token"
+		now := time.Now()
+		if !r.NextUpdate.IsZero() && now.After(r.NextUpdate) {
+			status += " [WARNING] [stale response]"
+		} else if now.Before(r.ThisUpdate) {
+			status += " [WARNING] [response not yet valid]"
+		}
+		return status
 	}
 	return hex.EncodeToString(ocspResponse)
 }
@@ -219,6 +257,8 @@ func PinHostWithTLS(host string, tlsconfig *tls.Config) string {
 	target := addCheckPort(host)
 	if tlsconfig == nil {
 		tlsconfig = &tls.Config{}
+	} else {
+		tlsconfig = tlsconfig.Clone() // never mutate the caller's config
 	}
 	tlsconfig.InsecureSkipVerify = true // skip here to pin keys trust-on-first-use, even on untrusted chains
 	conn, err := tls.DialWithDialer(&net.Dialer{Timeout: _dialWait}, _tcp, target, tlsconfig)
@@ -226,9 +266,7 @@ func PinHostWithTLS(host string, tlsconfig *tls.Config) string {
 		return "[tlsinfo] [error] [connect] " + target + " -> " + err.Error()
 	}
 	defer func() {
-		if err := conn.Close(); err != nil {
-			fmt.Printf("[tlsinfo] [error] during connection close: %s: %s", target, err.Error())
-		}
+		_ = conn.Close()
 	}()
 	certs := conn.ConnectionState().PeerCertificates
 	if len(certs) > 0 {
@@ -258,9 +296,7 @@ func PinStartTLS(host, protocol string, t *tls.Config) string {
 		return "[starttls] [error] [connect] " + host + " -> " + err.Error()
 	}
 	defer func() {
-		if err := conn.Close(); err != nil {
-			fmt.Printf("[starttls] [error] during connection close: %s", err.Error())
-		}
+		_ = conn.Close()
 	}()
 	certs := conn.ConnectionState().PeerCertificates
 	if len(certs) > 0 {
@@ -280,14 +316,13 @@ func PinVerifyStartTLS(keyPin, host, protocol string, t *tls.Config) bool {
 
 // ReportStartTLS ...
 func ReportStartTLS(host, protocol string, t *tls.Config, e *reportstyle.Style) string {
+	e = styleOr(e)
 	conn, err := starttlsDial(protocol, host, t)
 	if err != nil {
-		return "[starttls] [error] [connect] " + host + " -> " + err.Error()
+		return esc("[starttls] [error] [connect] "+host+" -> "+err.Error(), e)
 	}
 	defer func() {
-		if err := conn.Close(); err != nil {
-			fmt.Printf("[starttls] [error] during connection close: %s", err.Error())
-		}
+		_ = conn.Close()
 	}()
 	return ReportConn(conn, e)
 }
