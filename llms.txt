@@ -18,7 +18,7 @@ Repo: https://github.com/paepckehh/tlsinfo | Docs: https://pkg.go.dev/paepcke.de
 - `starttls.go` — STARTTLS backend: protocol table (`_starttlsProtocols`), upgrade dialer
 - `cmd/tlsinfo/` — CLI main (thin wrapper, POSIX flags via stdlib `flag`)
 - `docs/hero-dark.svg`, `docs/hero-light.svg` — hand-built SVG README banners, switched by `<picture>` + `prefers-color-scheme`
-- `docs/demo-report.svg`, `docs/demo-alert.svg` — colorful terminal captures of real CLI output (`github.com`, `expired.badssl.com`) embedded in the README
+- `docs/demo-report.svg`, `docs/demo-alert.svg` — console captures of real CLI output (`github.com`, `expired.badssl.com`), ANSI colors mapped 1:1, embedded in the README
 
 ## API quick map
 
@@ -31,11 +31,11 @@ Repo: https://github.com/paepckehh/tlsinfo | Docs: https://pkg.go.dev/paepcke.de
 ## Conventions
 
 - CLI: POSIX flags (`-starttls`, `-pin`, `-verbose`, `-html`, `-no-color`, `-version`); flags must precede hosts; env vars `NO_COLOR`, `VERBOSE`, `HTML`, `PINONLY`, `STARTTLS` act as fallback defaults (empty = off); piped hosts win, empty input falls back to argv
-- CLI exit codes: 0 ok, 1 host check failed, 2 usage error; version injected at build time via `-ldflags "-X main._version=<git tag>"` (shown at startup, in `-h`, and via `-version`)
+- CLI exit codes: 0 ok, 1 host check failed, 2 usage error; version injected at build time via `-ldflags "-X main._version=<git tag>"`, with a `debug.ReadBuildInfo()` fallback for `go install` builds (shown at startup, in `-h`, and via `-version`)
 - Errors embedded in returned strings: `[tlsinfo]` / `[starttls]` `[error] ...`; the CLI appends the missing newline
 - Output values are passed through `Style.SaniFunc` (HTML escaping), reports are wrapped in `Style.Start`/`End`; caller `*tls.Config` is cloned, never mutated
 - STARTTLS protocols: `smtp`, `imap`, `pop3`, `nntp`, `ftp`; one response line is capped at 4096 bytes
-- go 1.27, CGO disabled, gofmt -s; `v*` tag pushes cut goreleaser releases
+- go 1.27.2, CGO disabled, gofmt -s; `v*` tag pushes cut goreleaser releases
 
 ## For agents
 

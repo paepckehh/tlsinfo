@@ -72,6 +72,10 @@
     <text x="420" y="279" text-anchor="middle">STARTTLS</text>
   </g>
 
+  <!-- established -->
+  <circle cx="78" cy="309" r="4" fill="#2da44e"/>
+  <text x="90" y="313" font-family="ui-monospace, SFMono-Regular, Menlo, Consolas, monospace" font-size="11.5" fill="#7b8b9b">on GitHub since December 2022 · 4 years of TLS reporting</text>
+
   <!-- terminal card -->
   <rect x="596" y="48" width="536" height="264" rx="14" fill="url(#card)" stroke="#d5dfe9"/>
   <rect x="596" y="48" width="536" height="40" rx="14" fill="url(#bar)"/>
@@ -86,7 +90,7 @@
     <text x="620" y="113" fill="#1a7f37">$ <tspan fill="#0d1721">tlsinfo github.com</tspan></text>
 
     <text x="620" y="143" fill="#647587">TLS Version</text>
-    <text x="760" y="143" fill="#0d1721">TLS1.3 [0x0304] <tspan fill="#1a7f37">[OK]</tspan></text>
+    <text x="760" y="143" fill="#0d1721">TLS1.3 [0x0304] [OK]</text>
 
     <text x="620" y="168" fill="#647587">Cipher Suite</text>
     <text x="760" y="168" fill="#0d1721">TLS_AES_128_GCM_SHA256</text>

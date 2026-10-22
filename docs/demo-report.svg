@@ -1,8 +1,7 @@
-<svg xmlns="http://www.w3.org/2000/svg" width="654" height="704" viewBox="0 0 654 704" role="img" aria-label="Terminal capture: tlsinfo github.com">
+<svg xmlns="http://www.w3.org/2000/svg" width="654" height="704" viewBox="0 0 654 704" role="img" aria-label="Console capture: tlsinfo github.com">
 <defs>
 <linearGradient id="bg" x1="0" y1="0" x2="654" y2="704" gradientUnits="userSpaceOnUse"><stop stop-color="#101821"/><stop offset="1" stop-color="#0a0f16"/></linearGradient>
 <linearGradient id="bar" x1="0" y1="0" x2="0" y2="1"><stop stop-color="#18222e"/><stop offset="1" stop-color="#121a24"/></linearGradient>
-<linearGradient id="edge" x1="0" y1="0" x2="1" y2="1"><stop stop-color="#2dd4bf" stop-opacity="0.9"/><stop offset="1" stop-color="#58a6ff" stop-opacity="0.55"/></linearGradient>
 <radialGradient id="glow" cx="0.5" cy="0.5" r="0.5"><stop stop-color="#2dd4bf" stop-opacity="0.14"/><stop offset="1" stop-color="#2dd4bf" stop-opacity="0"/></radialGradient>
 </defs>
 <rect width="654" height="704" rx="14" fill="url(#bg)"/>
@@ -20,141 +19,106 @@
 <tspan fill="#e6edf3">tlsinfo github.com</tspan>
 </text>
 <text x="26" y="118.0" xml:space="preserve" font-family="ui-monospace, SFMono-Regular, 'SF Mono', Menlo, Consolas, 'Liberation Mono', monospace" font-size="13.0">
-<tspan fill="#e0b95e">NET Local Address         </tspan>
-<tspan fill="#79c0ff"> : 10.20.0.99</tspan>
+<tspan fill="#c9d1d9">tlsinfo v0.1.68</tspan>
 </text>
 <text x="26" y="139.0" xml:space="preserve" font-family="ui-monospace, SFMono-Regular, 'SF Mono', Menlo, Consolas, 'Liberation Mono', monospace" font-size="13.0">
-<tspan fill="#e0b95e">NET Local Port            </tspan>
-<tspan fill="#79c0ff"> : 57822</tspan>
+<tspan fill="#dcb567">NET Local Address         </tspan>
+<tspan fill="#79c0ff"> : 10.20.0.99</tspan>
 </text>
 <text x="26" y="160.0" xml:space="preserve" font-family="ui-monospace, SFMono-Regular, 'SF Mono', Menlo, Consolas, 'Liberation Mono', monospace" font-size="13.0">
-<tspan fill="#e0b95e">NET Remote Address        </tspan>
-<tspan fill="#79c0ff"> : 140.82.121.4</tspan>
+<tspan fill="#dcb567">NET Local Port            </tspan>
+<tspan fill="#79c0ff"> : 49140</tspan>
 </text>
 <text x="26" y="181.0" xml:space="preserve" font-family="ui-monospace, SFMono-Regular, 'SF Mono', Menlo, Consolas, 'Liberation Mono', monospace" font-size="13.0">
-<tspan fill="#e0b95e">NET Remote Port           </tspan>
-<tspan fill="#79c0ff"> : 443</tspan>
+<tspan fill="#dcb567">NET Remote Address        </tspan>
+<tspan fill="#79c0ff"> : 140.82.121.4</tspan>
 </text>
 <text x="26" y="202.0" xml:space="preserve" font-family="ui-monospace, SFMono-Regular, 'SF Mono', Menlo, Consolas, 'Liberation Mono', monospace" font-size="13.0">
-<tspan fill="#e0b95e">TLS Handshake Finished    </tspan>
-<tspan fill="#79c0ff"> : true</tspan>
+<tspan fill="#dcb567">NET Remote Port           </tspan>
+<tspan fill="#79c0ff"> : 443</tspan>
 </text>
 <text x="26" y="223.0" xml:space="preserve" font-family="ui-monospace, SFMono-Regular, 'SF Mono', Menlo, Consolas, 'Liberation Mono', monospace" font-size="13.0">
-<tspan fill="#e0b95e">TLS Version               </tspan>
-<tspan fill="#79c0ff"> : TLS1.3 </tspan>
-<tspan fill="#79c0ff">[0x0304]</tspan>
-<tspan fill="#79c0ff"> </tspan>
-<tspan fill="#56d364">[OK]</tspan>
+<tspan fill="#dcb567">TLS Handshake Finished    </tspan>
+<tspan fill="#79c0ff"> : true</tspan>
 </text>
 <text x="26" y="244.0" xml:space="preserve" font-family="ui-monospace, SFMono-Regular, 'SF Mono', Menlo, Consolas, 'Liberation Mono', monospace" font-size="13.0">
-<tspan fill="#e0b95e">TLS ALPN                  </tspan>
-<tspan fill="#79c0ff"> : </tspan>
+<tspan fill="#dcb567">TLS Version               </tspan>
+<tspan fill="#79c0ff"> : TLS1.3 [0x0304] [OK]</tspan>
 </text>
 <text x="26" y="265.0" xml:space="preserve" font-family="ui-monospace, SFMono-Regular, 'SF Mono', Menlo, Consolas, 'Liberation Mono', monospace" font-size="13.0">
-<tspan fill="#e0b95e">TLS Resumed               </tspan>
-<tspan fill="#79c0ff"> : false</tspan>
+<tspan fill="#dcb567">TLS ALPN                  </tspan>
+<tspan fill="#79c0ff"> : </tspan>
 </text>
 <text x="26" y="286.0" xml:space="preserve" font-family="ui-monospace, SFMono-Regular, 'SF Mono', Menlo, Consolas, 'Liberation Mono', monospace" font-size="13.0">
-<tspan fill="#e0b95e">TLS Server Name           </tspan>
-<tspan fill="#79c0ff"> : github.com</tspan>
+<tspan fill="#dcb567">TLS Resumed               </tspan>
+<tspan fill="#79c0ff"> : false</tspan>
 </text>
 <text x="26" y="307.0" xml:space="preserve" font-family="ui-monospace, SFMono-Regular, 'SF Mono', Menlo, Consolas, 'Liberation Mono', monospace" font-size="13.0">
-<tspan fill="#e0b95e">TLS Cipher Suite          </tspan>
-<tspan fill="#79c0ff"> : TLS_AES_128_GCM_SHA256</tspan>
+<tspan fill="#dcb567">TLS Server Name           </tspan>
+<tspan fill="#79c0ff"> : github.com</tspan>
 </text>
 <text x="26" y="328.0" xml:space="preserve" font-family="ui-monospace, SFMono-Regular, 'SF Mono', Menlo, Consolas, 'Liberation Mono', monospace" font-size="13.0">
-<tspan fill="#e0b95e">TLS Uniq ID               </tspan>
+<tspan fill="#dcb567">TLS Cipher Suite          </tspan>
+<tspan fill="#79c0ff"> : TLS_AES_128_GCM_SHA256</tspan>
 </text>
 <text x="26" y="349.0" xml:space="preserve" font-family="ui-monospace, SFMono-Regular, 'SF Mono', Menlo, Consolas, 'Liberation Mono', monospace" font-size="13.0">
-<tspan fill="#e0b95e">TLS Signed Timestamps     </tspan>
+<tspan fill="#dcb567">TLS Uniq ID               </tspan>
 </text>
 <text x="26" y="370.0" xml:space="preserve" font-family="ui-monospace, SFMono-Regular, 'SF Mono', Menlo, Consolas, 'Liberation Mono', monospace" font-size="13.0">
-<tspan fill="#e0b95e">TLS Verified Cert Chains</tspan>
+<tspan fill="#dcb567">TLS Signed Timestamps     </tspan>
 </text>
 <text x="26" y="391.0" xml:space="preserve" font-family="ui-monospace, SFMono-Regular, 'SF Mono', Menlo, Consolas, 'Liberation Mono', monospace" font-size="13.0">
-<tspan fill="#79c0ff"> : </tspan>
-<tspan fill="#79c0ff">[none]</tspan>
-<tspan fill="#79c0ff"> </tspan>
-<tspan fill="#79c0ff">[chain verification not performed by this connection]</tspan>
+<tspan fill="#dcb567">TLS Verified Cert Chains</tspan>
 </text>
 <text x="26" y="412.0" xml:space="preserve" font-family="ui-monospace, SFMono-Regular, 'SF Mono', Menlo, Consolas, 'Liberation Mono', monospace" font-size="13.0">
-<tspan fill="#e0b95e">TLS Peer Send Certs</tspan>
+<tspan fill="#79c0ff"> : [none] [chain verification not performed by this connection]</tspan>
 </text>
-<text x="26" y="454.0" xml:space="preserve" font-family="ui-monospace, SFMono-Regular, 'SF Mono', Menlo, Consolas, 'Liberation Mono', monospace" font-size="13.0">
-<tspan fill="#e0b95e">X509 Cert Subject          </tspan>
-<tspan fill="#79c0ff"> : </tspan>
-<tspan fill="#79c0ff">[CN=github.com]</tspan>
-<tspan fill="#79c0ff"> </tspan>
+<text x="26" y="433.0" xml:space="preserve" font-family="ui-monospace, SFMono-Regular, 'SF Mono', Menlo, Consolas, 'Liberation Mono', monospace" font-size="13.0">
+<tspan fill="#dcb567">TLS Peer Send Certs</tspan>
 </text>
 <text x="26" y="475.0" xml:space="preserve" font-family="ui-monospace, SFMono-Regular, 'SF Mono', Menlo, Consolas, 'Liberation Mono', monospace" font-size="13.0">
-<tspan fill="#e0b95e">X509 Cert Status           </tspan>
-<tspan fill="#79c0ff"> : </tspan>
-<tspan fill="#56d364">[VALID]</tspan>
-<tspan fill="#c9d1d9"> </tspan>
-<tspan fill="#c9d1d9">[for the next 38 days]</tspan>
+<tspan fill="#dcb567">X509 Cert Subject          </tspan>
+<tspan fill="#79c0ff"> : [CN=github.com] </tspan>
 </text>
 <text x="26" y="496.0" xml:space="preserve" font-family="ui-monospace, SFMono-Regular, 'SF Mono', Menlo, Consolas, 'Liberation Mono', monospace" font-size="13.0">
-<tspan fill="#e0b95e">X509 Cert Signature Algo   </tspan>
+<tspan fill="#dcb567">X509 Cert Status           </tspan>
 <tspan fill="#79c0ff"> : </tspan>
 <tspan fill="#56d364">[VALID]</tspan>
-<tspan fill="#c9d1d9"> </tspan>
-<tspan fill="#c9d1d9">[ECDSA-SHA256]</tspan>
-<tspan fill="#c9d1d9"> </tspan>
+<tspan fill="#c9d1d9"> [for the next 38 days]</tspan>
 </text>
 <text x="26" y="517.0" xml:space="preserve" font-family="ui-monospace, SFMono-Regular, 'SF Mono', Menlo, Consolas, 'Liberation Mono', monospace" font-size="13.0">
-<tspan fill="#e0b95e">X509 Cert Public Key       </tspan>
+<tspan fill="#dcb567">X509 Cert Signature Algo   </tspan>
 <tspan fill="#79c0ff"> : </tspan>
 <tspan fill="#56d364">[VALID]</tspan>
-<tspan fill="#c9d1d9"> </tspan>
-<tspan fill="#c9d1d9">[ECDSA]</tspan>
-<tspan fill="#c9d1d9"> </tspan>
-<tspan fill="#c9d1d9">[prime256v1]</tspan>
-<tspan fill="#c9d1d9"> </tspan>
+<tspan fill="#c9d1d9"> [ECDSA-SHA256] </tspan>
 </text>
 <text x="26" y="538.0" xml:space="preserve" font-family="ui-monospace, SFMono-Regular, 'SF Mono', Menlo, Consolas, 'Liberation Mono', monospace" font-size="13.0">
-<tspan fill="#e0b95e">X509 Cert KeyPin </tspan>
-<tspan fill="#e0b95e">[base64]</tspan>
-<tspan fill="#e0b95e">  </tspan>
+<tspan fill="#dcb567">X509 Cert Public Key       </tspan>
 <tspan fill="#79c0ff"> : </tspan>
-<tspan fill="#79c0ff">[/wiL5vgOLgwED41WS0DNF8QiTBVR/P41Kd163tmFxK0=]</tspan>
-<tspan fill="#79c0ff"> </tspan>
+<tspan fill="#56d364">[VALID]</tspan>
+<tspan fill="#c9d1d9"> [ECDSA] [prime256v1] </tspan>
 </text>
 <text x="26" y="559.0" xml:space="preserve" font-family="ui-monospace, SFMono-Regular, 'SF Mono', Menlo, Consolas, 'Liberation Mono', monospace" font-size="13.0">
-<tspan fill="#e0b95e">X509 Cert Valid for Host   </tspan>
-<tspan fill="#79c0ff"> : </tspan>
-<tspan fill="#79c0ff">[github.com]</tspan>
-<tspan fill="#79c0ff"> </tspan>
-<tspan fill="#79c0ff">[www.github.com]</tspan>
-<tspan fill="#79c0ff"> </tspan>
+<tspan fill="#dcb567">X509 Cert KeyPin [base64]  </tspan>
+<tspan fill="#79c0ff"> : [/wiL5vgOLgwED41WS0DNF8QiTBVR/P41Kd163tmFxK0=] </tspan>
 </text>
 <text x="26" y="580.0" xml:space="preserve" font-family="ui-monospace, SFMono-Regular, 'SF Mono', Menlo, Consolas, 'Liberation Mono', monospace" font-size="13.0">
-<tspan fill="#e0b95e">X509 Cert Key Usage        </tspan>
-<tspan fill="#79c0ff"> : </tspan>
-<tspan fill="#79c0ff">[CRITICAL]</tspan>
-<tspan fill="#79c0ff"> </tspan>
-<tspan fill="#79c0ff">[Digital Signature]</tspan>
-<tspan fill="#79c0ff"> </tspan>
+<tspan fill="#dcb567">X509 Cert Valid for Host   </tspan>
+<tspan fill="#79c0ff"> : [github.com] [www.github.com] </tspan>
 </text>
 <text x="26" y="601.0" xml:space="preserve" font-family="ui-monospace, SFMono-Regular, 'SF Mono', Menlo, Consolas, 'Liberation Mono', monospace" font-size="13.0">
-<tspan fill="#e0b95e">X509 Cert Key Usage Ext    </tspan>
-<tspan fill="#79c0ff"> : </tspan>
-<tspan fill="#79c0ff">[TLS Web server authentication]</tspan>
-<tspan fill="#79c0ff"> </tspan>
+<tspan fill="#dcb567">X509 Cert Key Usage        </tspan>
+<tspan fill="#79c0ff"> : [CRITICAL] [Digital Signature] </tspan>
 </text>
 <text x="26" y="622.0" xml:space="preserve" font-family="ui-monospace, SFMono-Regular, 'SF Mono', Menlo, Consolas, 'Liberation Mono', monospace" font-size="13.0">
-<tspan fill="#e0b95e">X509 Cert Transparency SCT </tspan>
-<tspan fill="#79c0ff"> : </tspan>
-<tspan fill="#56d364">[YES]</tspan>
-<tspan fill="#79c0ff"> </tspan>
-<tspan fill="#79c0ff">[RFC6962 SCT]</tspan>
-<tspan fill="#79c0ff"> </tspan>
+<tspan fill="#dcb567">X509 Cert Key Usage Ext    </tspan>
+<tspan fill="#79c0ff"> : [TLS Web server authentication] </tspan>
 </text>
 <text x="26" y="643.0" xml:space="preserve" font-family="ui-monospace, SFMono-Regular, 'SF Mono', Menlo, Consolas, 'Liberation Mono', monospace" font-size="13.0">
-<tspan fill="#e0b95e">X509 CA Authority          </tspan>
-<tspan fill="#79c0ff"> : </tspan>
-<tspan fill="#79c0ff">[NO]</tspan>
+<tspan fill="#dcb567">X509 Cert Transparency SCT </tspan>
+<tspan fill="#79c0ff"> : [YES] [RFC6962 SCT] </tspan>
 </text>
 <line x1="0" y1="662" x2="654" y2="662" stroke="#1a2431"/>
-<text x="26" y="678" font-family="ui-monospace, SFMono-Regular, 'SF Mono', Menlo, Consolas, 'Liberation Mono', monospace" font-size="11" fill="#6e7d8f">one connection · one report · exit 0</text>
 <circle cx="15" cy="674" r="3.5" fill="#2dd4bf"/>
+<text x="26" y="678" font-family="ui-monospace, SFMono-Regular, 'SF Mono', Menlo, Consolas, 'Liberation Mono', monospace" font-size="11" fill="#6e7d8f">one connection · one report · exit 0</text>
 </svg>

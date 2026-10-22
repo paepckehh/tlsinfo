@@ -8,6 +8,7 @@ import (
 	"fmt"
 	"io"
 	"os"
+	"runtime/debug"
 	"strings"
 
 	"paepcke.de/reportstyle"
@@ -40,10 +41,10 @@ func main() {
 	showVersion := flag.Bool("version", false, "print version and exit")
 	flag.Parse()
 	if *showVersion {
-		fmt.Println(_version)
+		fmt.Println(buildVersion())
 		return
 	}
-	fmt.Fprintf(os.Stderr, "tlsinfo %s\n", _version)
+	fmt.Fprintf(os.Stderr, "tlsinfo %s\n", buildVersion())
 	style := reportstyle.StyleAnsi()
 	switch {
 	case *html:
@@ -77,9 +78,20 @@ func main() {
 // LITTLE GENERIC HELPER SECTION
 //
 
+// buildVersion ... build-time tag when injected, module version for `go install`, dev otherwise
+func buildVersion() string {
+	if _version != "" && _version != "dev" {
+		return _version
+	}
+	if bi, ok := debug.ReadBuildInfo(); ok && bi.Main.Version != "" && bi.Main.Version != "(devel)" {
+		return bi.Main.Version
+	}
+	return _version
+}
+
 // usage ...
 func usage() {
-	fmt.Fprintf(os.Stderr, "tlsinfo %s - report TLS connection and certificate details\n\n", _version)
+	fmt.Fprintf(os.Stderr, "tlsinfo %s - report TLS connection and certificate details\n\n", buildVersion())
 	fmt.Fprintf(os.Stderr, "usage: tlsinfo [flags] host [host...]\n       hosts are read from stdin when piped\n\nflags:\n")
 	flag.PrintDefaults()
 }

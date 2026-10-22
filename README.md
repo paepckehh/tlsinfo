@@ -15,11 +15,15 @@ handshake, the certificate chain, the key pins and the OCSP staple *actually* lo
 
 No config files. No daemon. No dependency tree.
 
+**An established project.** First commit December 2022, four years of releases, a
+Dependabot-maintained dependency tree and a test suite that never touches the network.
+
 [![Go Reference](https://pkg.go.dev/badge/paepcke.de/tlsinfo.svg)](https://pkg.go.dev/paepcke.de/tlsinfo)
 [![Go Report Card](https://goreportcard.com/badge/paepcke.de/tlsinfo)](https://goreportcard.com/report/paepcke.de/tlsinfo)
 [![Go Version](https://img.shields.io/github/go-mod/go-version/paepckehh/tlsinfo)](go.mod)
 [![License](https://img.shields.io/github/license/paepckehh/tlsinfo)](https://github.com/paepckehh/tlsinfo/blob/master/LICENSE)
 [![Release](https://img.shields.io/github/v/release/paepckehh/tlsinfo?color=success&label=release)](https://github.com/paepckehh/tlsinfo/releases/latest)
+[![on GitHub since 2022](https://img.shields.io/badge/on%20GitHub-since%202022-2dd4bf?style=flat)](https://github.com/paepckehh/tlsinfo/commits)
 [![built with nix](https://builtwithnix.org/badge.svg)](https://search.nixos.org/packages?channel=unstable&show=tlsinfo&from=0&size=50&sort=relevance&type=packages&query=tlsinfo)
 
 [![Go Build](https://github.com/paepckehh/tlsinfo/actions/workflows/golang.yml/badge.svg)](https://github.com/paepckehh/tlsinfo/actions/workflows/golang.yml)
@@ -207,6 +211,13 @@ Every flag has an environment variable fallback for existing scripts
 Flags go **before** the hosts (`tlsinfo -pin github.com`, not `tlsinfo github.com -pin`).
 Piped hosts win when the stream carries any; otherwise the command line is used.
 
+### Version
+
+Every run announces its build on stderr (`tlsinfo v0.1.68`), and `-version` prints just the
+semver on stdout. Release binaries embed the git tag at build time; `go install ...@latest`
+builds fall back to the module version recorded by the Go toolchain, so the startup line
+stays a real semver instead of an empty placeholder.
+
 ### STARTTLS
 
 Analyze mail and news servers that only speak TLS after an in-band upgrade:
@@ -316,9 +327,10 @@ connection and one report.
 
 ## Design promises
 
-- **Boring dependency tree.** Standard library plus three focused direct packages, and only
-  the two transitive modules they require (`x/sys`, `certificate-transparency-go`). No
-  framework, no CLI toolkit, no YAML loader.
+- **Boring dependency tree.** Standard library plus three focused direct packages
+  (`certinfo`, `reportstyle`, `x/crypto`), and only three transitive modules behind them
+  (`certificate-transparency-go`, `go-logr/logr`, `k8s.io/klog/v2`). No framework, no CLI
+  toolkit, no YAML loader.
 - **Static binary.** `CGO_ENABLED=0` everywhere, including releases.
 - **Offline tests.** The suite spins up loopback TLS and STARTTLS servers; `make test`
   never touches the network.

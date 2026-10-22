@@ -38,6 +38,23 @@ func TestVersionDefault(t *testing.T) {
 	}
 }
 
+// TestBuildVersion ...
+func TestBuildVersion(t *testing.T) {
+	if got := buildVersion(); got == "" {
+		t.Error("buildVersion() must never be empty")
+	}
+	old := _version
+	defer func() { _version = old }()
+	_version = "v0.0.0-test"
+	if got := buildVersion(); got != "v0.0.0-test" {
+		t.Errorf("buildVersion() = %q, want the injected tag", got)
+	}
+	_version = "dev"
+	if got := buildVersion(); got == "" {
+		t.Error("buildVersion() must fall back to a non-empty value without an injected tag")
+	}
+}
+
 // TestGetPipe ...
 func TestGetPipe(t *testing.T) {
 	content := "github.com\npaepcke.de\n"
