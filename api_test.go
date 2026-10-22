@@ -353,6 +353,29 @@ func TestNilArguments(t *testing.T) {
 	if PinVerifyConn("pin", nil) {
 		t.Error("PinVerifyConn(nil) = true, want false")
 	}
+	if PinVerifyState("pin", nil) {
+		t.Error("PinVerifyState(nil) = true, want false")
+	}
+}
+
+// TestPinVerifyFailure ...
+func TestPinVerifyFailure(t *testing.T) {
+	t.Parallel()
+	const unreachable = "127.0.0.1:1"
+	errPin := PinHostWithTLS(unreachable, nil)
+	if !isTaggedError(errPin) {
+		t.Fatalf("PinHostWithTLS(%q) = %q, want a tagged error", unreachable, errPin)
+	}
+	if PinVerifyHostWithTLS(errPin, unreachable, nil) {
+		t.Error("PinVerifyHostWithTLS() must not verify a failed lookup")
+	}
+	errPin = PinStartTLS(unreachable, SMTP, nil)
+	if !isTaggedError(errPin) {
+		t.Fatalf("PinStartTLS(%q) = %q, want a tagged error", unreachable, errPin)
+	}
+	if PinVerifyStartTLS(errPin, unreachable, SMTP, nil) {
+		t.Error("PinVerifyStartTLS() must not verify a failed lookup")
+	}
 }
 
 // TestReportTlsStateWithoutVerifiedChains ...

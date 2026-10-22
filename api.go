@@ -97,6 +97,9 @@ func PinVerifyConn(keyPin string, conn *tls.Conn) bool {
 
 // PinVerifyState ...
 func PinVerifyState(keyPin string, state *tls.ConnectionState) bool {
+	if state == nil {
+		return false
+	}
 	if len(state.PeerCertificates) > 0 {
 		if keyPin == certinfo.KeyPinBase64(state.PeerCertificates[0]) {
 			return true
@@ -249,7 +252,8 @@ func ReportOcsp(conn *tls.Conn, issuerCert *x509.Certificate) string {
 
 // PinVerifyHostWithTLS ...
 func PinVerifyHostWithTLS(keyPin, host string, tlsconfig *tls.Config) bool {
-	return keyPin == PinHostWithTLS(host, tlsconfig)
+	pin := PinHostWithTLS(host, tlsconfig)
+	return !isTaggedError(pin) && keyPin == pin
 }
 
 // PinHostWithTLS ...
@@ -307,7 +311,8 @@ func PinStartTLS(host, protocol string, t *tls.Config) string {
 
 // PinVerifyStartTLS ...
 func PinVerifyStartTLS(keyPin, host, protocol string, t *tls.Config) bool {
-	return keyPin == PinStartTLS(host, protocol, t)
+	pin := PinStartTLS(host, protocol, t)
+	return !isTaggedError(pin) && keyPin == pin
 }
 
 //

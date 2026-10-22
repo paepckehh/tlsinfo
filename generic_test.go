@@ -78,6 +78,9 @@ func TestAddCheckPort(t *testing.T) {
 		{"trims surrounding whitespace", "  github.com  ", "github.com:443"},
 		{"empty host stays empty", "", ""},
 		{"blank host stays empty", "   ", ""},
+		{"empty host with port stays empty", ":443", ""},
+		{"empty host with empty port stays empty", ":", ""},
+		{"empty bracketed host stays empty", "[]:443", ""},
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {

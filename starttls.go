@@ -55,7 +55,7 @@ func addStarttlsPort(proto, host string) (string, error) {
 
 // starttlsUnsupported ...
 func starttlsUnsupported(proto string) error {
-	return fmt.Errorf("[starttls] [error] [unsupported protocol: %q] [supported: %s]", proto, starttlsSupported())
+	return fmt.Errorf("[unsupported protocol: %q] [supported: %s]", proto, starttlsSupported())
 }
 
 // starttlsSupported ...
@@ -130,22 +130,22 @@ func starttlsUpgrade(proto string, conn net.Conn) error {
 func reply(r *bufio.Reader, conn net.Conn, send, want string) error {
 	if send != "" {
 		if _, err := conn.Write([]byte(send + _crlf)); err != nil {
-			return fmt.Errorf("[starttls] [error] [unable to send: %q] %s", send, err.Error())
+			return fmt.Errorf("[unable to send: %q] %s", send, err.Error())
 		}
 	}
 	line, err := readLine(r)
 	if err != nil {
-		return fmt.Errorf("[starttls] [error] [unable to read response of: %q] %s", send, err.Error())
+		return fmt.Errorf("[unable to read response of: %q] %s", send, err.Error())
 	}
 	for {
 		if !strings.HasPrefix(line, want) {
-			return fmt.Errorf("[starttls] [error] [unexpected response: %q] [want prefix: %q]", line, want)
+			return fmt.Errorf("[unexpected response: %q] [want prefix: %q]", line, want)
 		}
 		if len(line) <= len(want) || line[len(want)] != '-' {
 			return nil
 		}
 		if line, err = readLine(r); err != nil {
-			return fmt.Errorf("[starttls] [error] [unable to read response of: %q] %s", send, err.Error())
+			return fmt.Errorf("[unable to read response of: %q] %s", send, err.Error())
 		}
 	}
 }
@@ -157,7 +157,7 @@ func readLine(r *bufio.Reader) (string, error) {
 		chunk, err := r.ReadSlice(_linefeed[0])
 		line = append(line, chunk...)
 		if len(line) > _maxLine {
-			return "", fmt.Errorf("[starttls] [error] [response line exceeds %d bytes]", _maxLine)
+			return "", fmt.Errorf("[response line exceeds %d bytes]", _maxLine)
 		}
 		if err == bufio.ErrBufferFull {
 			continue

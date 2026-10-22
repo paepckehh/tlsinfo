@@ -328,8 +328,10 @@ Library guarantees worth knowing:
 
 - your `*tls.Config` is **cloned**, never mutated, even though inspection forces
   `InsecureSkipVerify`;
-- `nil` styles, connections and requests are tolerated (plain-text report or tagged error,
-  never a panic);
+- `nil` styles, connections and requests are tolerated (plain-text report, tagged error or
+  `false`, never a panic);
+- pin verification is false when the lookup failed, so an error message can never be
+  mistaken for a matching pin;
 - the library never writes to stdout. Output is always the returned string.
 
 ## How it works

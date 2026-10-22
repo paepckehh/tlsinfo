@@ -245,7 +245,14 @@ func TestReportStartTLS(t *testing.T) {
 	if PinVerifyStartTLS("nope", addr, SMTP, &tls.Config{}) {
 		t.Error("PinVerifyStartTLS() = true, want false for mismatched key pin")
 	}
-	if out := ReportStartTLS(addr, "telnet", &tls.Config{}, reportstyle.StyleText()); !strings.Contains(out, "[starttls] [error]") {
+	out = ReportStartTLS(addr, "telnet", &tls.Config{}, reportstyle.StyleText())
+	if !strings.Contains(out, "[starttls] [error]") {
 		t.Errorf("ReportStartTLS() unsupported protocol must report an error, got:\n%s", out)
+	}
+	if n := strings.Count(out, "[starttls] [error]"); n != 1 {
+		t.Errorf("ReportStartTLS() error must be tagged exactly once, got %d tags:\n%s", n, out)
+	}
+	if got := PinStartTLS(addr, "telnet", nil); strings.Count(got, "[starttls] [error]") != 1 {
+		t.Errorf("PinStartTLS() unsupported protocol must be tagged exactly once, got:\n%s", got)
 	}
 }

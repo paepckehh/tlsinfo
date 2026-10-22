@@ -141,7 +141,8 @@ func checkArgs(hosts []string) error {
 // out ...
 func out(msg string) {
 	if _, err := os.Stdout.WriteString(withNewline(msg)); err != nil {
-		panic("unrecoverable error, unable to write stdout")
+		fmt.Fprintln(os.Stderr, _app+_err+"unable to write to stdout: "+err.Error())
+		os.Exit(1)
 	}
 }
 

@@ -59,6 +59,11 @@ func document(in string, e *reportstyle.Style) string {
 	return e.Start + in + e.End
 }
 
+// isTaggedError ... reports whether s is an error string returned by this library
+func isTaggedError(s string) bool {
+	return strings.HasPrefix(s, "[tlsinfo] [error]") || strings.HasPrefix(s, "[starttls] [error]")
+}
+
 // splitAddr ...
 func splitAddr(addr string) (string, string) {
 	host, port, err := net.SplitHostPort(addr)
@@ -80,9 +85,13 @@ func addPort(host, port string) string {
 	if host == "" {
 		return "" // let the dialer report a missing address instead of probing localhost
 	}
-	if h, p, err := net.SplitHostPort(host); err == nil && p != "" {
-		return host
-	} else if err == nil {
+	if h, p, err := net.SplitHostPort(host); err == nil {
+		if h == "" {
+			return "" // empty host (":", ":443", "[]:443"), never probe localhost
+		}
+		if p != "" {
+			return host
+		}
 		host = h // strip an empty port (host:) and append the default below
 	}
 	if strings.Contains(host, _doublepoint) && !strings.HasPrefix(host, "[") {
