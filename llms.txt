@@ -18,6 +18,7 @@ Repo: https://github.com/paepckehh/tlsinfo | Docs: https://pkg.go.dev/paepcke.de
 - `starttls.go` — STARTTLS backend: protocol table (`_starttlsProtocols`), upgrade dialer
 - `cmd/tlsinfo/` — CLI main (thin wrapper, POSIX flags via stdlib `flag`)
 - `docs/hero-dark.svg`, `docs/hero-light.svg` — hand-built SVG README banners, switched by `<picture>` + `prefers-color-scheme`
+- `docs/demo-report.svg`, `docs/demo-alert.svg` — colorful terminal captures of real CLI output (`github.com`, `expired.badssl.com`) embedded in the README
 
 ## API quick map
 

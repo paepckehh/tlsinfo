@@ -3,7 +3,7 @@
 <picture>
   <source media="(prefers-color-scheme: dark)" srcset="docs/hero-dark.svg">
   <source media="(prefers-color-scheme: light)" srcset="docs/hero-light.svg">
-  <img src="docs/hero-dark.svg" alt="tlsinfo: a hand-built dashboard illustration showing a TLS handshake report with version verdicts, certificate status, SPKI pin and a leaf-bound OCSP staple" width="1200">
+  <img src="docs/hero-dark.svg" alt="tlsinfo: a dashboard illustration showing a TLS 1.3 handshake report with version verdicts, certificate status, SPKI pin, leaf-bound OCSP staple and STARTTLS support" width="1200">
 </picture>
 
 # 🔐 tlsinfo
@@ -43,12 +43,13 @@ No config files. No daemon. No dependency tree.
 > tlsinfo github.com
 > ```
 >
-> One command. One report. Every TLS fact you were about to dig out of `openssl s_client`.
+> One command. One connection. Every TLS fact you were about to dig out of `openssl s_client`.
 
 ## Contents
 
 - [Why tlsinfo](#why-tlsinfo)
 - [See it in action](#see-it-in-action)
+- [Catch what OpenSSL makes you work for](#catch-what-openssl-makes-you-work-for)
 - [Install](#install)
 - [Usage](#usage)
 - [Library](#library)
@@ -88,31 +89,14 @@ answer one question: **is this connection what I think it is?**
 
 ## See it in action
 
-```console
-$ tlsinfo github.com
-NET Local Address          : 10.20.0.99
-NET Local Port             : 39360
-NET Remote Address         : 140.82.121.4
-NET Remote Port            : 443
-TLS Handshake Finished     : true
-TLS Version                : TLS1.3 [0x0304] [OK]
-TLS ALPN                   :
-TLS Resumed                : false
-TLS Server Name            : github.com
-TLS Cipher Suite           : TLS_AES_128_GCM_SHA256
-TLS Uniq ID
-TLS Signed Timestamps
-TLS Verified Cert Chains
-[none] [chain verification not performed by this connection]
-  X509 Cert Subject          : [CN=github.com]
-  X509 Cert Status           : [VALID] [for the next 49 days]
-  X509 Cert Signature Algo   : [VALID] [ECDSA-SHA256]
-  X509 Cert Public Key       : [VALID] [ECDSA] [prime256v1]
-  X509 Cert KeyPin [base64]  : [/wiL5vgOLgwED41WS0DNF8QiTBVR/P41Kd163tmFxK0=]
-  [...]
-```
+Real output. Real connection. One command:
 
-One report per host. Pass several, or pipe a list:
+<div align="center">
+  <img src="docs/demo-report.svg" alt="Terminal running tlsinfo github.com: NET remote 140.82.121.4:443, TLS1.3 [0x0304] [OK], cipher TLS_AES_128_GCM_SHA256, X509 status VALID for the next 38 days, ECDSA prime256v1 key pin, RFC6962 SCT present" width="760">
+</div>
+
+Handshake, chain, key pin and certificate verdicts in a single pass. Pass several hosts, or
+pipe a list and let it run:
 
 ```shell
 tlsinfo github.com paepcke.de
@@ -120,11 +104,50 @@ echo github.com | tlsinfo
 cat hosts.txt | tlsinfo
 ```
 
-Want just the pin? `tlsinfo -pin github.com`.
+### One flag away from everything else
 
-Want the mail server behind port 587? `tlsinfo -starttls smtp smtp.gmail.com:587`.
+```shell
+# just the base64 SPKI pin, nothing else
+tlsinfo -pin github.com
 
-Want HTML for a dashboard? `tlsinfo -html github.com | your-renderer`.
+# the mail server behind port 587
+tlsinfo -starttls smtp smtp.gmail.com:587
+
+# the news server nobody has checked since 2009
+tlsinfo -starttls nntp news.eternal-september.org
+
+# HTML for a dashboard, injection-safe
+tlsinfo -html github.com | your-renderer
+
+# raw PEM and OpenSSL-grade certificate detail
+tlsinfo -verbose github.com
+```
+
+Hosts are normalized for you: the default port is appended, bare IPv6 literals are
+bracketed, and empty input is rejected instead of quietly probing localhost.
+
+## Catch what OpenSSL makes you work for
+
+Expired chains, untrusted issuers, legacy fallbacks, stale staples and revoked leaves are
+not buried in a wall of PEM. They are verdicts, in color, on the line that matters:
+
+<div align="center">
+  <img src="docs/demo-alert.svg" alt="Terminal running tlsinfo expired.badssl.com: TLS1.2 [0x0303] [LEGACY FALLBACK], X509 status [FAIL] expired since 4210 days, issuer signature state [FAIL] certificate has expired" width="900">
+</div>
+
+Exit codes are just as blunt:
+
+| Code | Meaning |
+|------|---------|
+| `0`  | every host check succeeded |
+| `1`  | a host check failed (unreachable, failed handshake, top-level `[error]`) |
+| `2`  | usage error (bad flags, flags after hosts, no hosts at all) |
+
+So `tlsinfo` slots straight into a deploy gate:
+
+```shell
+tlsinfo github.com || exit 1
+```
 
 ## Install
 
@@ -184,9 +207,6 @@ Every flag has an environment variable fallback for existing scripts
 Flags go **before** the hosts (`tlsinfo -pin github.com`, not `tlsinfo github.com -pin`).
 Piped hosts win when the stream carries any; otherwise the command line is used.
 
-Exit codes: `0` every check succeeded, `1` a host check failed (unreachable, failed
-handshake, ...), `2` usage error.
-
 ### STARTTLS
 
 Analyze mail and news servers that only speak TLS after an in-band upgrade:
@@ -195,8 +215,8 @@ Analyze mail and news servers that only speak TLS after an in-band upgrade:
 tlsinfo -starttls smtp  smtp.gmail.com:587
 tlsinfo -starttls imap  mail.example.com
 tlsinfo -starttls pop3  mail.example.com
-tlsinfo -starttls nntp  news.example.com
-tlsinfo -starttls ftp   ftp.example.com
+tlsinfo -starttls nntp  news.eternal-september.org
+tlsinfo -starttls ftp   ftp.gnu.org
 ```
 
 The protocol name is case- and whitespace-insensitive (`SMTP`, ` smtp ` both work), and the
@@ -313,6 +333,8 @@ connection and one report.
 - Agent/contributor notes: [AGENTS.md](AGENTS.md)
 - Theme-aware README banners (hand-built SVG, `prefers-color-scheme`):
   [dark](docs/hero-dark.svg), [light](docs/hero-light.svg)
+- Real terminal captures used above: [clean report](docs/demo-report.svg),
+  [expired chain](docs/demo-alert.svg)
 - Found a security issue? See [SECURITY.md](SECURITY.md)
 
 ## Contributing

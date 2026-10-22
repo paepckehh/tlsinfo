@@ -37,6 +37,8 @@ cmd/tlsinfo/      CLI main — thin wrapper, all logic lives in the root package
 llms.txt           AI-friendly repo overview (LLM entrypoint, keep in sync)
 docs/hero-dark.svg  theme-aware README banner, dark (hand-built SVG dashboard)
 docs/hero-light.svg theme-aware README banner, light
+docs/demo-report.svg terminal capture of `tlsinfo github.com` rendered as SVG
+docs/demo-alert.svg  terminal capture of `tlsinfo expired.badssl.com` (red verdicts)
 ```
 
 Three-layer API in `api.go`, top-down:
@@ -60,6 +62,7 @@ Data flow: hostname → `addCheckPort`/`addStarttlsPort` (append default port, b
 - `gofmt -s` (simplify) formatting; CGO disabled in Makefile, CI, and `.goreleaser.yml`.
 - **`.goreleaser.yml` is a goreleaser v2 config** (`version: 2`): `go mod tidy` pre-hook, `-s -w` ldflags strip, CGO_ENABLED=0, GitHub changelog (`use: github`) grouped by conventional-commit type (`feat` → Features, `fix` → Bug fixes, `perf|refactor|improve` → Improvements, `docs` → Documentation, `ci|build|chore` → CI & Build, rest → Others; `docs:`/`test:`/`chore:` commits excluded), plus deb/rpm `nfpms` packages. `.github/workflows/release.yml` pins checkout/setup-go/goreleaser-action@v7 and goreleaser v2.18.2, triggers on `v*` tag push (or manual dispatch), needs `contents: write` — keep it in sync with `../opnborg`, the working reference. `.github/workflows/golang.yml` also uses `@v7` + `go-version-file: go.mod` (no hardcoded Go version).
 - Dependency bumps arrive via Dependabot PRs, commit style `build(deps): bump <module> from X to Y`.
+- **README terminal demos are real captures.** `docs/demo-report.svg` and `docs/demo-alert.svg` contain the actual colored CLI output for `tlsinfo github.com` and `tlsinfo expired.badssl.com`; only the verdict tokens (`[OK]`, `[VALID]`, `[FAIL]`, `[LEGACY FALLBACK]`, ...) are tinted green/yellow/red. Regenerate them from a live run rather than inventing output, and keep the hero banners' terminal card consistent with the real report layout.
 - **STARTTLS backend lives in `starttls.go`**: exported protocol identifiers (`SMTP`, `IMAP`, `POP3`, `NNTP`, `FTP`) map to **one** table `_starttlsProtocols` (rows are `starttlsDef{port, sequence}`: default plaintext port + negotiation steps of command + expected response prefix). The unsupported-protocol error comes from `starttlsUnsupported` and derives its protocol list from the table (`starttlsSupported`, sorted). `starttlsDial` trims/lowercases the protocol identifier, clones the caller's config, sets `InsecureSkipVerify` + infers `ServerName` (like `tls.Dial`), dials with `net.DialTimeout` (30s `_dialWait` cap — a bare `net.Dial` hangs for minutes on firewalled/dropped SYN ports), and re-arms a fresh 30s deadline before the TLS handshake so negotiation and handshake each get their own window.
 
 ## Gotchas
