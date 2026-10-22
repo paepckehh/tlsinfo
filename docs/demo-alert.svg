@@ -19,7 +19,7 @@
 <tspan fill="#e6edf3">tlsinfo expired.badssl.com</tspan>
 </text>
 <text x="26" y="118.0" xml:space="preserve" font-family="ui-monospace, SFMono-Regular, 'SF Mono', Menlo, Consolas, 'Liberation Mono', monospace" font-size="13.0">
-<tspan fill="#c9d1d9">tlsinfo v0.1.68</tspan>
+<tspan fill="#c9d1d9">tlsinfo v0.1.69</tspan>
 </text>
 <text x="26" y="139.0" xml:space="preserve" font-family="ui-monospace, SFMono-Regular, 'SF Mono', Menlo, Consolas, 'Liberation Mono', monospace" font-size="13.0">
 <tspan fill="#dcb567">NET Local Address         </tspan>
@@ -27,7 +27,7 @@
 </text>
 <text x="26" y="160.0" xml:space="preserve" font-family="ui-monospace, SFMono-Regular, 'SF Mono', Menlo, Consolas, 'Liberation Mono', monospace" font-size="13.0">
 <tspan fill="#dcb567">NET Local Port            </tspan>
-<tspan fill="#79c0ff"> : 47738</tspan>
+<tspan fill="#79c0ff"> : 41874</tspan>
 </text>
 <text x="26" y="181.0" xml:space="preserve" font-family="ui-monospace, SFMono-Regular, 'SF Mono', Menlo, Consolas, 'Liberation Mono', monospace" font-size="13.0">
 <tspan fill="#dcb567">NET Remote Address        </tspan>
@@ -63,7 +63,7 @@
 </text>
 <text x="26" y="349.0" xml:space="preserve" font-family="ui-monospace, SFMono-Regular, 'SF Mono', Menlo, Consolas, 'Liberation Mono', monospace" font-size="13.0">
 <tspan fill="#dcb567">TLS Uniq ID               </tspan>
-<tspan fill="#79c0ff"> : 25403b0e37ad8cba6a92ff69</tspan>
+<tspan fill="#79c0ff"> : fa517b220dd9df6ba0c21056</tspan>
 </text>
 <text x="26" y="370.0" xml:space="preserve" font-family="ui-monospace, SFMono-Regular, 'SF Mono', Menlo, Consolas, 'Liberation Mono', monospace" font-size="13.0">
 <tspan fill="#dcb567">TLS Signed Timestamps     </tspan>
@@ -127,7 +127,7 @@
 <tspan fill="#dcb567">X509 Issuer Signature State</tspan>
 <tspan fill="#79c0ff"> : </tspan>
 <tspan fill="#ff7b72">[FAIL]</tspan>
-<tspan fill="#c9d1d9"> [x509: certificate has expired or is not yet valid: current time 2026-10-22T15:07] </tspan>
+<tspan fill="#c9d1d9"> [x509: certificate has expired or is not yet valid: current time 2026-10-22T15:24] </tspan>
 </text>
 <text x="26" y="706.0" xml:space="preserve" font-family="ui-monospace, SFMono-Regular, 'SF Mono', Menlo, Consolas, 'Liberation Mono', monospace" font-size="13.0">
 <tspan fill="#dcb567">X509 Issuer URL            </tspan>

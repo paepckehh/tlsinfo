@@ -1,115 +1,127 @@
-<svg xmlns="http://www.w3.org/2000/svg" width="1200" height="360" viewBox="0 0 1200 360" role="img" aria-labelledby="hero-title hero-desc">
+<svg xmlns="http://www.w3.org/2000/svg" width="1200" height="400" viewBox="0 0 1200 400" role="img" aria-labelledby="hero-title hero-desc">
   <title id="hero-title">tlsinfo - TLS connection report dashboard</title>
-  <desc id="hero-desc">The tlsinfo wordmark next to a terminal card running tlsinfo github.com, showing a TLS 1.3 handshake, cipher suite, certificate validity, SPKI key pin, a leaf-bound OCSP staple and STARTTLS support.</desc>
+  <desc id="hero-desc">The tlsinfo wordmark and an established-2022 badge next to a terminal card running tlsinfo github.com: startup version, TLS 1.3 handshake, cipher suite, certificate validity, SPKI key pin, leaf-bound OCSP staple and STARTTLS support.</desc>
 
   <defs>
-    <linearGradient id="bg" x1="0" y1="0" x2="1200" y2="360" gradientUnits="userSpaceOnUse">
-      <stop stop-color="#0a0e14"/>
-      <stop offset="0.55" stop-color="#0e1621"/>
-      <stop offset="1" stop-color="#121a26"/>
+    <linearGradient id="bg" x1="0" y1="0" x2="1200" y2="400" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#080c12"/>
+      <stop offset="0.45" stop-color="#0d1520"/>
+      <stop offset="1" stop-color="#121c29"/>
     </linearGradient>
-    <linearGradient id="accent" x1="72" y1="0" x2="330" y2="0" gradientUnits="userSpaceOnUse">
+    <linearGradient id="accent" x1="72" y1="0" x2="360" y2="0" gradientUnits="userSpaceOnUse">
       <stop stop-color="#58a6ff"/>
       <stop offset="1" stop-color="#2dd4bf"/>
     </linearGradient>
-    <linearGradient id="badge" x1="72" y1="64" x2="136" y2="128" gradientUnits="userSpaceOnUse">
-      <stop stop-color="#16222f"/>
-      <stop offset="1" stop-color="#0d1520"/>
+    <linearGradient id="badge" x1="72" y1="72" x2="144" y2="144" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#172433"/>
+      <stop offset="1" stop-color="#0c141e"/>
     </linearGradient>
-    <linearGradient id="card" x1="596" y1="48" x2="1132" y2="312" gradientUnits="userSpaceOnUse">
-      <stop stop-color="#111a26"/>
-      <stop offset="1" stop-color="#0b121a"/>
+    <linearGradient id="card" x1="580" y1="56" x2="1136" y2="344" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#121c28"/>
+      <stop offset="1" stop-color="#0a1119"/>
     </linearGradient>
-    <linearGradient id="bar" x1="0" y1="48" x2="0" y2="88" gradientUnits="userSpaceOnUse">
-      <stop stop-color="#18222e"/>
-      <stop offset="1" stop-color="#121a24"/>
+    <linearGradient id="bar" x1="0" y1="56" x2="0" y2="98" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#1a2634"/>
+      <stop offset="1" stop-color="#131c27"/>
+    </linearGradient>
+    <linearGradient id="sheen" x1="580" y1="56" x2="760" y2="200" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#ffffff" stop-opacity="0.05"/>
+      <stop offset="1" stop-color="#ffffff" stop-opacity="0"/>
     </linearGradient>
     <radialGradient id="glow" cx="0.5" cy="0.5" r="0.5">
-      <stop stop-color="#2dd4bf" stop-opacity="0.20"/>
+      <stop stop-color="#2dd4bf" stop-opacity="0.22"/>
       <stop offset="1" stop-color="#2dd4bf" stop-opacity="0"/>
     </radialGradient>
     <radialGradient id="glowBlue" cx="0.5" cy="0.5" r="0.5">
-      <stop stop-color="#58a6ff" stop-opacity="0.16"/>
+      <stop stop-color="#58a6ff" stop-opacity="0.18"/>
       <stop offset="1" stop-color="#58a6ff" stop-opacity="0"/>
     </radialGradient>
     <pattern id="grid" width="32" height="32" patternUnits="userSpaceOnUse">
       <path d="M32 0H0v32" fill="none" stroke="#182131" stroke-width="1"/>
     </pattern>
     <clipPath id="frame">
-      <rect width="1200" height="360" rx="18"/>
+      <rect width="1200" height="400" rx="20"/>
     </clipPath>
   </defs>
 
   <g clip-path="url(#frame)">
-    <rect width="1200" height="360" fill="url(#bg)"/>
-    <rect width="1200" height="360" fill="url(#grid)" opacity="0.5"/>
-    <ellipse cx="880" cy="120" rx="360" ry="200" fill="url(#glow)"/>
-    <ellipse cx="200" cy="330" rx="300" ry="180" fill="url(#glowBlue)"/>
-    <rect x="0" y="0" width="1200" height="3" fill="url(#accent)" opacity="0.75"/>
+    <rect width="1200" height="400" fill="url(#bg)"/>
+    <rect width="1200" height="400" fill="url(#grid)" opacity="0.45"/>
+    <ellipse cx="900" cy="110" rx="400" ry="220" fill="url(#glow)"/>
+    <ellipse cx="150" cy="360" rx="340" ry="200" fill="url(#glowBlue)"/>
+    <path d="M40 330C240 300 330 210 560 190" fill="none" stroke="#2dd4bf" stroke-opacity="0.10" stroke-width="1.5"/>
+    <path d="M40 350C260 320 350 240 560 220" fill="none" stroke="#58a6ff" stroke-opacity="0.08" stroke-width="1.5"/>
+    <rect x="0" y="0" width="1200" height="3" fill="url(#accent)" opacity="0.85"/>
   </g>
-  <rect x="0.5" y="0.5" width="1199" height="359" rx="17.5" fill="none" stroke="#1e2a3a"/>
+  <rect x="0.5" y="0.5" width="1199" height="399" rx="19.5" fill="none" stroke="#1e2a3a"/>
 
   <!-- badge -->
-  <rect x="72" y="64" width="64" height="64" rx="18" fill="url(#badge)" stroke="#22303f"/>
-  <rect x="89" y="98" width="30" height="21" rx="5" fill="none" stroke="url(#accent)" stroke-width="2.4"/>
-  <path d="M94 98v-6a10 10 0 0 1 20 0v6" fill="none" stroke="url(#accent)" stroke-width="2.4" stroke-linecap="round"/>
-  <circle cx="104" cy="108" r="2.2" fill="#2dd4bf"/>
+  <rect x="72" y="72" width="72" height="72" rx="20" fill="url(#badge)" stroke="#22303f"/>
+  <rect x="91" y="110" width="34" height="24" rx="6" fill="none" stroke="url(#accent)" stroke-width="2.6"/>
+  <path d="M97 110v-7a11 11 0 0 1 22 0v7" fill="none" stroke="url(#accent)" stroke-width="2.6" stroke-linecap="round"/>
+  <circle cx="108" cy="121" r="2.4" fill="#2dd4bf"/>
+
+  <!-- since badge -->
+  <rect x="160" y="88" width="132" height="26" rx="13" fill="#0f1a24" stroke="#22303f"/>
+  <circle cx="178" cy="101" r="3.5" fill="#3fb950"/>
+  <text x="188" y="105" font-family="ui-monospace, SFMono-Regular, Menlo, Consolas, monospace" font-size="10.5" fill="#8b98a9">ON GITHUB SINCE 2022</text>
 
   <!-- wordmark -->
-  <text x="72" y="188" font-family="ui-sans-serif, -apple-system, 'Segoe UI', Inter, Helvetica, Arial, sans-serif" font-size="58" font-weight="700" letter-spacing="-1.6" fill="url(#accent)">tlsinfo</text>
-  <text x="73" y="216" font-family="ui-sans-serif, -apple-system, 'Segoe UI', Inter, Helvetica, Arial, sans-serif" font-size="17" fill="#8b98a9">Know exactly what's on the wire.</text>
-  <text x="73" y="240" font-family="ui-monospace, SFMono-Regular, Menlo, Consolas, monospace" font-size="11.5" fill="#5d6f80">one static binary   zero config   zero daemon</text>
+  <text x="72" y="212" font-family="ui-sans-serif, -apple-system, 'Segoe UI', Inter, Helvetica, Arial, sans-serif" font-size="66" font-weight="700" letter-spacing="-1.8" fill="url(#accent)">tlsinfo</text>
+  <text x="73" y="242" font-family="ui-sans-serif, -apple-system, 'Segoe UI', Inter, Helvetica, Arial, sans-serif" font-size="18" fill="#93a1b1">Know exactly what's on the wire.</text>
+  <text x="73" y="266" font-family="ui-monospace, SFMono-Regular, Menlo, Consolas, monospace" font-size="11.5" fill="#5d6f80">one static binary   zero config   zero daemon   no external CLI libs</text>
 
   <!-- feature pills -->
   <g font-family="ui-monospace, SFMono-Regular, Menlo, Consolas, monospace" font-size="11.5" fill="#93a1b1">
-    <rect x="72" y="262" width="92" height="26" rx="13" fill="#101923" stroke="#22303f"/>
-    <text x="118" y="279" text-anchor="middle">TLS 1.3</text>
-    <rect x="174" y="262" width="72" height="26" rx="13" fill="#101923" stroke="#22303f"/>
-    <text x="210" y="279" text-anchor="middle">OCSP</text>
-    <rect x="256" y="262" width="102" height="26" rx="13" fill="#101923" stroke="#22303f"/>
-    <text x="307" y="279" text-anchor="middle">SPKI pins</text>
-    <rect x="368" y="262" width="104" height="26" rx="13" fill="#101923" stroke="#22303f"/>
-    <text x="420" y="279" text-anchor="middle">STARTTLS</text>
+    <rect x="72" y="290" width="96" height="28" rx="14" fill="#101923" stroke="#22303f"/>
+    <text x="120" y="308" text-anchor="middle">TLS 1.3</text>
+    <rect x="178" y="290" width="74" height="28" rx="14" fill="#101923" stroke="#22303f"/>
+    <text x="215" y="308" text-anchor="middle">OCSP</text>
+    <rect x="262" y="290" width="106" height="28" rx="14" fill="#101923" stroke="#22303f"/>
+    <text x="315" y="308" text-anchor="middle">SPKI pins</text>
+    <rect x="378" y="290" width="110" height="28" rx="14" fill="#101923" stroke="#22303f"/>
+    <text x="433" y="308" text-anchor="middle">STARTTLS</text>
   </g>
 
-  <!-- established -->
-  <circle cx="78" cy="309" r="4" fill="#3fb950"/>
-  <text x="90" y="313" font-family="ui-monospace, SFMono-Regular, Menlo, Consolas, monospace" font-size="11.5" fill="#5d6f80">on GitHub since December 2022 · 4 years of TLS reporting</text>
+  <!-- established metrics -->
+  <text x="72" y="350" font-family="ui-monospace, SFMono-Regular, Menlo, Consolas, monospace" font-size="11.5" fill="#5d6f80">2022-12-18 <tspan fill="#2dd4bf">·</tspan> fourth year of TLS reporting <tspan fill="#2dd4bf">·</tspan> 5 protocols <tspan fill="#2dd4bf">·</tspan> 0 runtime deps</text>
 
   <!-- terminal card -->
-  <rect x="596" y="48" width="536" height="264" rx="14" fill="url(#card)" stroke="#22303f"/>
-  <rect x="596" y="48" width="536" height="40" rx="14" fill="url(#bar)"/>
-  <rect x="596" y="74" width="536" height="14" fill="#121a24"/>
-  <line x1="596" y1="87.5" x2="1132" y2="87.5" stroke="#22303f"/>
-  <circle cx="620" cy="68" r="4.5" fill="#f2585b"/>
-  <circle cx="636" cy="68" r="4.5" fill="#e3b341"/>
-  <circle cx="652" cy="68" r="4.5" fill="#3fb950"/>
-  <text x="864" y="72" text-anchor="middle" font-family="ui-monospace, SFMono-Regular, Menlo, Consolas, monospace" font-size="11" fill="#7d8b9c">~/tls · tlsinfo</text>
+  <rect x="580" y="56" width="556" height="288" rx="15" fill="url(#card)" stroke="#22303f"/>
+  <rect x="580" y="56" width="556" height="42" rx="15" fill="url(#bar)"/>
+  <rect x="580" y="84" width="556" height="14" fill="#131c27"/>
+  <line x1="580" y1="97.5" x2="1136" y2="97.5" stroke="#22303f"/>
+  <rect x="580" y="56" width="556" height="200" fill="url(#sheen)" opacity="0.5"/>
+  <circle cx="604" cy="77" r="4.5" fill="#f2585b"/>
+  <circle cx="620" cy="77" r="4.5" fill="#e3b341"/>
+  <circle cx="636" cy="77" r="4.5" fill="#3fb950"/>
+  <text x="858" y="81" text-anchor="middle" font-family="ui-monospace, SFMono-Regular, Menlo, Consolas, monospace" font-size="11" fill="#7d8b9c">~/tls · tlsinfo</text>
 
   <g font-family="ui-monospace, SFMono-Regular, Menlo, Consolas, monospace" font-size="12.5">
-    <text x="620" y="113" fill="#56d364">$ <tspan fill="#e6edf3">tlsinfo github.com</tspan></text>
+    <text x="604" y="122" fill="#5d6f80">tlsinfo v0.1.69</text>
+    <text x="604" y="145" fill="#56d364">$ <tspan fill="#e6edf3">tlsinfo github.com</tspan></text>
 
-    <text x="620" y="143" fill="#8b98a9">TLS Version</text>
-    <text x="760" y="143" fill="#e6edf3">TLS1.3 [0x0304] [OK]</text>
+    <text x="604" y="175" fill="#8b98a9">TLS Version</text>
+    <text x="748" y="175" fill="#e6edf3">TLS1.3 [0x0304] [OK]</text>
 
-    <text x="620" y="168" fill="#8b98a9">Cipher Suite</text>
-    <text x="760" y="168" fill="#e6edf3">TLS_AES_128_GCM_SHA256</text>
+    <text x="604" y="198" fill="#8b98a9">Cipher Suite</text>
+    <text x="748" y="198" fill="#e6edf3">TLS_AES_128_GCM_SHA256</text>
 
-    <text x="620" y="193" fill="#8b98a9">X509 Status</text>
-    <text x="760" y="193" fill="#3fb950">[VALID] <tspan fill="#8b98a9">38 days left</tspan></text>
+    <text x="604" y="221" fill="#8b98a9">X509 Status</text>
+    <text x="748" y="221" fill="#3fb950">[VALID] <tspan fill="#8b98a9">38 days left</tspan></text>
 
-    <text x="620" y="218" fill="#8b98a9">KeyPin</text>
-    <text x="760" y="218" fill="#79c0ff">/wiL5vgOLgwED41W&#8230;FxK0=</text>
+    <text x="604" y="244" fill="#8b98a9">KeyPin</text>
+    <text x="748" y="244" fill="#79c0ff">/wiL5vgOLgwED41W&#8230;FxK0=</text>
 
-    <text x="620" y="243" fill="#8b98a9">OCSP Staple</text>
-    <text x="760" y="243" fill="#3fb950">[GOOD] <tspan fill="#8b98a9">bound to leaf</tspan></text>
+    <text x="604" y="267" fill="#8b98a9">OCSP Staple</text>
+    <text x="748" y="267" fill="#3fb950">[GOOD] <tspan fill="#8b98a9">bound to leaf</tspan></text>
 
-    <text x="620" y="268" fill="#8b98a9">STARTTLS</text>
-    <text x="760" y="268" fill="#e6edf3">smtp · imap · pop3 · nntp · ftp</text>
+    <text x="604" y="290" fill="#8b98a9">STARTTLS</text>
+    <text x="748" y="290" fill="#e6edf3">smtp · imap · pop3 · nntp · ftp</text>
   </g>
 
-  <line x1="620" y1="284" x2="1108" y2="284" stroke="#1c2837"/>
-  <circle cx="625" cy="297" r="3.5" fill="#3fb950"/>
-  <text x="638" y="301" font-family="ui-monospace, SFMono-Regular, Menlo, Consolas, monospace" font-size="10.5" fill="#6e7d8f">one connection · one report</text>
-  <text x="1108" y="301" text-anchor="end" font-family="ui-monospace, SFMono-Regular, Menlo, Consolas, monospace" font-size="10.5" fill="#3fb950">exit 0</text>
+  <line x1="604" y1="306" x2="1112" y2="306" stroke="#1c2837"/>
+  <circle cx="609" cy="322" r="3.5" fill="#3fb950"/>
+  <text x="622" y="326" font-family="ui-monospace, SFMono-Regular, Menlo, Consolas, monospace" font-size="10.5" fill="#6e7d8f">one connection · one report</text>
+  <text x="1112" y="326" text-anchor="end" font-family="ui-monospace, SFMono-Regular, Menlo, Consolas, monospace" font-size="10.5" fill="#3fb950">exit 0</text>
 </svg>

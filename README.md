@@ -3,20 +3,21 @@
 <picture>
   <source media="(prefers-color-scheme: dark)" srcset="docs/hero-dark.svg">
   <source media="(prefers-color-scheme: light)" srcset="docs/hero-light.svg">
-  <img src="docs/hero-dark.svg" alt="tlsinfo: a dashboard illustration showing a TLS 1.3 handshake report with version verdicts, certificate status, SPKI pin, leaf-bound OCSP staple and STARTTLS support" width="1200">
+  <img src="docs/hero-dark.svg" alt="tlsinfo: wordmark and console card showing a TLS 1.3 report with validity verdicts, SPKI pin, leaf-bound OCSP staple and STARTTLS support" width="1200">
 </picture>
 
 # 🔐 tlsinfo
 
-**Know exactly what's on the wire.**
+**TLS inspection without the archaeology.**
 
-One static binary that talks TLS to anything (web, mail, news, FTP) and tells you what the
-handshake, the certificate chain, the key pins and the OCSP staple *actually* look like.
+`openssl s_client` hands you a wall of PEM and a feeling. `tlsinfo` hands you a verdict:
+one static binary, one connection, every TLS fact on the wire.
 
 No config files. No daemon. No dependency tree.
 
-**An established project.** First commit December 2022, four years of releases, a
-Dependabot-maintained dependency tree and a test suite that never touches the network.
+**An established project.** On GitHub since December 2022, now in its fourth year of
+releases, with a Dependabot-maintained dependency tree and a test suite that never touches
+the network.
 
 [![Go Reference](https://pkg.go.dev/badge/paepcke.de/tlsinfo.svg)](https://pkg.go.dev/paepcke.de/tlsinfo)
 [![Go Report Card](https://goreportcard.com/badge/paepcke.de/tlsinfo)](https://goreportcard.com/report/paepcke.de/tlsinfo)
@@ -47,13 +48,13 @@ Dependabot-maintained dependency tree and a test suite that never touches the ne
 > tlsinfo github.com
 > ```
 >
-> One command. One connection. Every TLS fact you were about to dig out of `openssl s_client`.
+> Install. Run. Read the verdict. Nothing else to configure.
 
 ## Contents
 
 - [Why tlsinfo](#why-tlsinfo)
 - [See it in action](#see-it-in-action)
-- [Catch what OpenSSL makes you work for](#catch-what-openssl-makes-you-work-for)
+- [When TLS is broken](#when-tls-is-broken)
 - [Install](#install)
 - [Usage](#usage)
 - [Library](#library)
@@ -70,11 +71,12 @@ TLS is invisible until it isn't. Then you are three terminals deep in `openssl s
 `openssl x509`, a calendar, a pinning spreadsheet and a browser devtools panel, trying to
 answer one question: **is this connection what I think it is?**
 
-`tlsinfo` answers it in one shot, for the CLI and for your Go code, using the same engine:
+`tlsinfo` answers it once, in one report, for the CLI and for your Go code, from the same
+engine:
 
 - 🧭 **Handshake truth, no interpretation** - TLS version, cipher suite, ALPN, resumption,
-  SCT timestamps and the TLS unique ID. Version labels carry instant `[OK]` /
-  `[LEGACY FALLBACK]` / `[SECURITY ALERT]` verdicts.
+  SCT timestamps and the TLS unique ID, with instant `[OK]` / `[LEGACY FALLBACK]` /
+  `[SECURITY ALERT]` verdicts.
 - 📄 **Every certificate, parsed** - subject, validity window, signature algorithm, public
   key, SANs, chain layout and the SPKI key pin, without a single OpenSSL invocation.
 - 🛡️ **OCSP that means something** - the stapled response is verified against the issuer
@@ -91,12 +93,26 @@ answer one question: **is this connection what I think it is?**
   [`reportstyle`](https://pkg.go.dev/paepcke.de/reportstyle) and
   [`x/crypto`](https://pkg.go.dev/golang.org/x/crypto). Nothing heavier sneaks in.
 
+### What ships where
+
+| Capability | `tlsinfo` CLI | Go library |
+|---|---|---|
+| Full handshake, chain and verdict report | ✅ | ✅ |
+| Base64 SPKI key pins | ✅ | ✅ |
+| Pin verification (trust-on-first-use) | - | ✅ |
+| Leaf-bound OCSP status | ✅ when stapled | ✅ `ReportOcsp` |
+| STARTTLS: SMTP, IMAP, POP3, NNTP, FTP | ✅ | ✅ |
+| Plain text, ANSI, HTML, custom styles | ✅ | ✅ |
+| Reports for your own HTTPS clients | - | ✅ `ReportHttpRequest` |
+
 ## See it in action
 
-Real output. Real connection. One command:
+Real output from a real connection, colors included:
 
 <div align="center">
-  <img src="docs/demo-report.svg" alt="Terminal running tlsinfo github.com: NET remote 140.82.121.4:443, TLS1.3 [0x0304] [OK], cipher TLS_AES_128_GCM_SHA256, X509 status VALID for the next 38 days, ECDSA prime256v1 key pin, RFC6962 SCT present" width="760">
+  <img src="docs/demo-report.svg" alt="Console running tlsinfo github.com: startup version line, TLS1.3 [0x0304] [OK], cipher TLS_AES_128_GCM_SHA256, X509 status [VALID] for the next 38 days, ECDSA prime256v1 key pin, RFC6962 SCT present" width="760">
+  <br>
+  <sub><code>$ tlsinfo github.com</code> · captured live, colors untouched</sub>
 </div>
 
 Handshake, chain, key pin and certificate verdicts in a single pass. Pass several hosts, or
@@ -130,13 +146,15 @@ tlsinfo -verbose github.com
 Hosts are normalized for you: the default port is appended, bare IPv6 literals are
 bracketed, and empty input is rejected instead of quietly probing localhost.
 
-## Catch what OpenSSL makes you work for
+## When TLS is broken
 
 Expired chains, untrusted issuers, legacy fallbacks, stale staples and revoked leaves are
 not buried in a wall of PEM. They are verdicts, in color, on the line that matters:
 
 <div align="center">
-  <img src="docs/demo-alert.svg" alt="Terminal running tlsinfo expired.badssl.com: TLS1.2 [0x0303] [LEGACY FALLBACK], X509 status [FAIL] expired since 4210 days, issuer signature state [FAIL] certificate has expired" width="900">
+  <img src="docs/demo-alert.svg" alt="Console running tlsinfo expired.badssl.com: TLS1.2 [0x0303] [LEGACY FALLBACK], X509 status [FAIL] expired since 4210 days, issuer signature state [FAIL] certificate has expired" width="900">
+  <br>
+  <sub><code>$ tlsinfo expired.badssl.com</code> · a deliberately broken host, reported honestly</sub>
 </div>
 
 Exit codes are just as blunt:
@@ -213,7 +231,7 @@ Piped hosts win when the stream carries any; otherwise the command line is used.
 
 ### Version
 
-Every run announces its build on stderr (`tlsinfo v0.1.68`), and `-version` prints just the
+Every run announces its build on stderr (`tlsinfo v0.1.69`), and `-version` prints just the
 semver on stdout. Release binaries embed the git tag at build time; `go install ...@latest`
 builds fall back to the module version recorded by the Go toolchain, so the startup line
 stays a real semver instead of an empty placeholder.

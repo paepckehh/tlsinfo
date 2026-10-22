@@ -19,7 +19,7 @@
 <tspan fill="#e6edf3">tlsinfo github.com</tspan>
 </text>
 <text x="26" y="118.0" xml:space="preserve" font-family="ui-monospace, SFMono-Regular, 'SF Mono', Menlo, Consolas, 'Liberation Mono', monospace" font-size="13.0">
-<tspan fill="#c9d1d9">tlsinfo v0.1.68</tspan>
+<tspan fill="#c9d1d9">tlsinfo v0.1.69</tspan>
 </text>
 <text x="26" y="139.0" xml:space="preserve" font-family="ui-monospace, SFMono-Regular, 'SF Mono', Menlo, Consolas, 'Liberation Mono', monospace" font-size="13.0">
 <tspan fill="#dcb567">NET Local Address         </tspan>
@@ -27,7 +27,7 @@
 </text>
 <text x="26" y="160.0" xml:space="preserve" font-family="ui-monospace, SFMono-Regular, 'SF Mono', Menlo, Consolas, 'Liberation Mono', monospace" font-size="13.0">
 <tspan fill="#dcb567">NET Local Port            </tspan>
-<tspan fill="#79c0ff"> : 49140</tspan>
+<tspan fill="#79c0ff"> : 39850</tspan>
 </text>
 <text x="26" y="181.0" xml:space="preserve" font-family="ui-monospace, SFMono-Regular, 'SF Mono', Menlo, Consolas, 'Liberation Mono', monospace" font-size="13.0">
 <tspan fill="#dcb567">NET Remote Address        </tspan>

@@ -35,8 +35,8 @@ generic_test.go   offline unit tests for the unexported helpers
 starttls_test.go  offline unit tests for the STARTTLS upgrades
 cmd/tlsinfo/      CLI main — thin wrapper, all logic lives in the root package
 llms.txt           AI-friendly repo overview (LLM entrypoint, keep in sync)
-docs/hero-dark.svg  theme-aware README banner, dark (hand-built SVG dashboard, "since 2022" line)
-docs/hero-light.svg theme-aware README banner, light
+docs/hero-dark.svg  theme-aware README banner, dark (hand-built SVG dashboard, since-2022 badge)
+docs/hero-light.svg theme-aware README banner, light (same layout, light palette)
 docs/demo-report.svg terminal capture of `tlsinfo github.com` rendered as SVG
 docs/demo-alert.svg  terminal capture of `tlsinfo expired.badssl.com` (red verdicts)
 ```
