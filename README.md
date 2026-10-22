@@ -1,5 +1,11 @@
 <div align="center">
 
+<picture>
+  <source media="(prefers-color-scheme: dark)" srcset="docs/hero-dark.svg">
+  <source media="(prefers-color-scheme: light)" srcset="docs/hero-light.svg">
+  <img src="docs/hero-dark.svg" alt="tlsinfo: a hand-built dashboard illustration showing a TLS handshake report with version verdicts, certificate status, SPKI pin and a leaf-bound OCSP staple" width="1200">
+</picture>
+
 # 🔐 tlsinfo
 
 **Know exactly what's on the wire.**
@@ -305,6 +311,8 @@ connection and one report.
 - [pkg.go.dev/paepcke.de/tlsinfo](https://pkg.go.dev/paepcke.de/tlsinfo)
 - Machine-readable repo overview for LLMs: [llms.txt](llms.txt)
 - Agent/contributor notes: [AGENTS.md](AGENTS.md)
+- Theme-aware README banners (hand-built SVG, `prefers-color-scheme`):
+  [dark](docs/hero-dark.svg), [light](docs/hero-light.svg)
 - Found a security issue? See [SECURITY.md](SECURITY.md)
 
 ## Contributing

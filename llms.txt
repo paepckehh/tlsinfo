@@ -17,6 +17,7 @@ Repo: https://github.com/paepckehh/tlsinfo | Docs: https://pkg.go.dev/paepcke.de
 - `generic.go` — unexported helpers (consts, version table, splitAddr, addPort, dial timeout)
 - `starttls.go` — STARTTLS backend: protocol table (`_starttlsProtocols`), upgrade dialer
 - `cmd/tlsinfo/` — CLI main (thin wrapper, POSIX flags via stdlib `flag`)
+- `docs/hero-dark.svg`, `docs/hero-light.svg` — hand-built SVG README banners, switched by `<picture>` + `prefers-color-scheme`
 
 ## API quick map
 
