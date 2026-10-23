@@ -15,16 +15,11 @@ one static binary, one connection, every TLS fact on the wire.
 
 No config files. No daemon. No dependency tree.
 
-**An established project.** On GitHub since December 2022, now in its fourth year of
-releases, with a Dependabot-maintained dependency tree and a test suite that never touches
-the network.
-
 [![Go Reference](https://pkg.go.dev/badge/paepcke.de/tlsinfo.svg)](https://pkg.go.dev/paepcke.de/tlsinfo)
 [![Go Report Card](https://goreportcard.com/badge/paepcke.de/tlsinfo)](https://goreportcard.com/report/paepcke.de/tlsinfo)
 [![Go Version](https://img.shields.io/github/go-mod/go-version/paepckehh/tlsinfo)](go.mod)
 [![License](https://img.shields.io/github/license/paepckehh/tlsinfo)](https://github.com/paepckehh/tlsinfo/blob/master/LICENSE)
 [![Release](https://img.shields.io/github/v/release/paepckehh/tlsinfo?color=success&label=release)](https://github.com/paepckehh/tlsinfo/releases/latest)
-[![on GitHub since 2022](https://img.shields.io/badge/on%20GitHub-since%202022-2dd4bf?style=flat)](https://github.com/paepckehh/tlsinfo/commits)
 [![built with nix](https://builtwithnix.org/badge.svg)](https://search.nixos.org/packages?channel=unstable&show=tlsinfo&from=0&size=50&sort=relevance&type=packages&query=tlsinfo)
 
 [![Go Build](https://github.com/paepckehh/tlsinfo/actions/workflows/golang.yml/badge.svg)](https://github.com/paepckehh/tlsinfo/actions/workflows/golang.yml)
@@ -34,6 +29,12 @@ the network.
 [![Forks](https://img.shields.io/github/forks/paepckehh/tlsinfo?style=flat)](https://github.com/paepckehh/tlsinfo/network)
 [![Issues](https://img.shields.io/github/issues/paepckehh/tlsinfo?style=flat)](https://github.com/paepckehh/tlsinfo/issues)
 [![Commit activity](https://img.shields.io/github/commit-activity/m/paepckehh/tlsinfo?style=flat&color=brightgreen)](https://github.com/paepckehh/tlsinfo/commits)
+
+<picture>
+  <source media="(prefers-color-scheme: dark)" srcset="docs/established-dark.svg">
+  <source media="(prefers-color-scheme: light)" srcset="docs/established-light.svg">
+  <img src="docs/established-light.svg" alt="tlsinfo: an established project, on GitHub since December 2022, now in its fourth year of releases, with a Dependabot-maintained dependency tree and a test suite that never touches the network" width="1200">
+</picture>
 
 [paepcke.de/tlsinfo](https://paepcke.de/tlsinfo/)
 
