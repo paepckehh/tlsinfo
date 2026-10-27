@@ -87,7 +87,7 @@ Data flow: hostname → `addCheckPort`/`addStarttlsPort` (append default port, b
 - **Verified chains stay empty for every tlsinfo-initiated dial** (Go only populates `ConnectionState.VerifiedChains` when `InsecureSkipVerify` is false). The report therefore renders `[none] [chain verification not performed by this connection]` instead of a silently empty section — don't remove that note without adding a real verification pass.
 - `ConnectionState.ServerName` is empty for IP-literal targets (Go zeroes SNI for IPs, `hostnameInSNI` in `crypto/tls`) — not a tlsinfo bug; same for plain `tls.Dial`. Test `127.0.0.1` STARTTLS targets accordingly.
 - Unbracketed IPv6 literals (`2001:db8::1`) get bracketed by `addPort` before port append; `host:port` with bare IPv6 is ambiguous input (stdlib requires brackets) and fails dial with a clear error.
-- go.mod declares `go 1.27.2`; both workflows use `go-version-file: go.mod`, so CI follows the module toolchain. Don't lower go.mod.
+- go.mod declares `go 1.27.3`; both workflows use `go-version-file: go.mod`, so CI follows the module toolchain. Don't lower go.mod.
 - `version()` in `generic.go` hard-codes TLS token labels incl. `[SECURITY ALERT]` verdicts — update both the extended and plain switch tables together.
 
 ## Finishing a task (repo owner's standing rule)

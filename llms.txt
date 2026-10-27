@@ -35,7 +35,7 @@ Repo: https://github.com/paepckehh/tlsinfo | Docs: https://pkg.go.dev/paepcke.de
 - Errors embedded in returned strings: `[tlsinfo]` / `[starttls]` `[error] ...`, tagged once at the exported boundary; the CLI appends the missing newline
 - Output values are passed through `Style.SaniFunc` (HTML escaping), reports are wrapped in `Style.Start`/`End`; caller `*tls.Config` is cloned, never mutated
 - STARTTLS protocols: `smtp`, `imap`, `pop3`, `nntp`, `ftp`; one response line is capped at 4096 bytes
-- go 1.27.2, CGO disabled, gofmt -s; `v*` tag pushes cut goreleaser releases
+- go 1.27.3, CGO disabled, gofmt -s; `v*` tag pushes cut goreleaser releases
 
 ## For agents
 
